@@ -1,0 +1,41 @@
+.member-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.member-h1 {
+  text-align: center;
+}
+.member-leader {
+  width: 40%;
+  text-align: center;
+  margin: 30px;
+}
+.member-member {
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+  flex-wrap: wrap;
+}
+.member-item {
+  width: 40%;
+  margin: 30px;
+}
+
+.member-image {
+  width: 60%;
+}
+
+.member-name {
+  text-align: center;
+  margin: 10px 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.member-position {
+  text-align: center;
+  margin-bottom: 20px;
+}

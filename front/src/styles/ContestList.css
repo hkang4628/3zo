@@ -1,0 +1,84 @@
+.contest-list {
+  display: flex;
+  flex-wrap: wrap;
+  /* justify-content: space-between; */
+  justify-content: space-around;
+}
+.contest-h1 {
+  text-align: center;
+}
+.contest-div {
+  display: flex;
+  justify-content: flex-end;
+  background: white;
+  margin: 1rem;
+}
+.contest-button {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  /* margin-right: 1rem; */
+  text-decoration: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.contest {
+  margin-bottom: 20px;
+  margin-top: 20px;
+  width: 30%;
+  /* min-width: 300px; */
+  border: 1px solid #ddd;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.contest:hover {
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.contest img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.contest-content {
+  padding: 16px;
+}
+
+.contest-content h2 {
+  font-size: 20px;
+  margin: 0;
+  margin-bottom: 8px;
+}
+
+.contest-content p {
+  font-size: 16px;
+  margin: 0;
+  margin-bottom: 4px;
+}
+
+.contest-content p:last-child {
+  margin-bottom: 0;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+}
+a:visited {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: none;
+}
+a:focus {
+  text-decoration: none;
+}
+a:hover,
+a:active {
+  text-decoration: none;
+}

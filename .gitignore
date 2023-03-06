@@ -1,0 +1,5 @@
+front/node_modules
+
+backend/my_setting.py
+
+terraform/credentials

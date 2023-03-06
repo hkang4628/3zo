@@ -1,0 +1,21 @@
+.org-chart {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.org-chart .manager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+  width: 100%;
+}
+
+.org-chart .manager .left,
+.org-chart .manager .right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
