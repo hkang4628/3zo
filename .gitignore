@@ -1,6 +1,8 @@
 front/node_modules
 
 backend/my_setting.py
+*.pyc
+__pycache__/
 
 terraform/.terraform
 terraform/terraform.tfstate
