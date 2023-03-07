@@ -26,7 +26,7 @@ const Signup = () => {
     const { id, pw, name, phone, email } = event.target.elements;
 
     try {
-      const response = await axios.post("http://localhost:8000/signup/", {
+      const response = await axios.post("http://111.67.218.43:8000/signup/", {
         id: id.value,
         pw: pw.value,
         name: name.value,

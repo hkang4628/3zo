@@ -40,7 +40,7 @@ const Login = () => {
     const { id, pw } = event.target.elements;
 
     try {
-      const response = await axios.post("http://localhost:8000/login/", {
+      const response = await axios.post("http://111.67.218.43:8000/login/", {
         id: id.value,
         pw: pw.value,
       });
