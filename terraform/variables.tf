@@ -13,3 +13,15 @@ variable "instance_type" {
 variable "key_name" {
   default = "my-key"
 }
+
+# Hosted zone name, id 정의
+variable "zone_name" {
+  default = "hkang.shop"
+}
+variable "zone_id" {
+  default = "Z093279026ZMIZQ76MIQ5"
+}
+
+variable "cache_policy_id" {
+  default = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+}

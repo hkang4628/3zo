@@ -58,11 +58,29 @@ resource "aws_subnet" "private_subnet2" {
   }
 }
 
+resource "aws_subnet" "private_subnet3" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.20.0/24"
+  availability_zone = "${var.aws_region}a"
+  tags = {
+    Name = "private_subnet3"
+  }
+}
+
+resource "aws_subnet" "private_subnet4" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.21.0/24"
+  availability_zone = "${var.aws_region}b"
+  tags = {
+    Name = "private_subnet4"
+  }
+}
+
 # 인터넷 게이트웨이 생성
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "My IGW"
+    Name = "Main IGW"
   }
 }
 
@@ -145,6 +163,18 @@ resource "aws_route_table_association" "private_rta2" {
   route_table_id = aws_route_table.private_rt2.id
 }
 
+# 프라이빗 서브넷과 라우트 테이블 연결3
+resource "aws_route_table_association" "private_rta3" {
+  subnet_id      = aws_subnet.private_subnet3.id
+  route_table_id = aws_route_table.private_rt1.id
+}
+
+# 프라이빗 서브넷과 라우트 테이블 연결4
+resource "aws_route_table_association" "private_rta4" {
+  subnet_id      = aws_subnet.private_subnet4.id
+  route_table_id = aws_route_table.private_rt2.id
+}
+
 # Security Group을 생성하는 코드를 작성합니다.
 resource "aws_security_group" "web_security_group" {
   vpc_id      = aws_vpc.main.id
@@ -153,6 +183,33 @@ resource "aws_security_group" "web_security_group" {
   ingress {
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+
+    # Private Subnet에서 외부와 통신할 수 있도록 CIDR 블록을 지정합니다.
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Security Group을 생성하는 코드를 작성합니다.
+resource "aws_security_group" "db_security_group" {
+  vpc_id      = aws_vpc.main.id
+  name_prefix = "db-security-group"
+
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -201,6 +258,9 @@ resource "aws_vpc_endpoint" "ssm_endpoint" {
   subnet_ids          = [aws_subnet.private_subnet1.id]
   security_group_ids  = [aws_security_group.https_sg.id]
   private_dns_enabled = true # private DNS 이름 활성화
+  tags = {
+    Name = "main endpoint ssm"
+  }
 
 }
 
@@ -211,6 +271,9 @@ resource "aws_vpc_endpoint" "ssmmessages_endpoint" {
   subnet_ids          = [aws_subnet.private_subnet1.id]
   security_group_ids  = [aws_security_group.https_sg.id]
   private_dns_enabled = true # private DNS 이름 활성화
+  tags = {
+    Name = "main endpoint ssmmessages"
+  }
 
 }
 
@@ -221,6 +284,9 @@ resource "aws_vpc_endpoint" "ec2messages_endpoint" {
   subnet_ids          = [aws_subnet.private_subnet1.id]
   security_group_ids  = [aws_security_group.https_sg.id]
   private_dns_enabled = true # private DNS 이름 활성화
+  tags = {
+    Name = "main endpoint ec2messages"
+  }
 
 }
 
@@ -289,6 +355,44 @@ resource "aws_launch_template" "web_launch_template" {
     tags = {
       Name = "web-instance"
     }
+  }
+}
+
+
+# Aurora DB 클러스터와 연결된 DB 서브넷 그룹을 생성합니다.
+resource "aws_db_subnet_group" "aurora_db_subnet_group" {
+  name       = "aurora-db-subnet-group"
+  subnet_ids = [ aws_subnet.private_subnet3.id ,aws_subnet.private_subnet4.id ]
+}
+
+# Aurora DB 클러스터를 생성합니다.
+resource "aws_rds_cluster" "aurora_cluster" {
+  cluster_identifier      = "aurora-cluster"
+  engine                  = "aurora"
+  engine_version          = "5.6.10a"
+  database_name           = "flower"
+  master_username         = "admin"
+  master_password         = "1234"
+  backup_retention_period = 7
+
+  # Aurora DB 클러스터와 연결된 보안 그룹을 지정합니다.
+  vpc_security_group_ids  = [aws_security_group.db_security_group.id]
+
+  # Aurora DB 클러스터와 연결된 DB 서브넷 그룹을 지정합니다.
+  db_subnet_group_name    = aws_db_subnet_group.aurora_db_subnet_group.name
+}
+
+# Aurora DB 인스턴스를 생성합니다.
+resource "aws_rds_cluster_instance" "aurora_instance" {
+  cluster_identifier = aws_rds_cluster.aurora_cluster.id
+  instance_class     = "db.t3.small"
+  engine             = "aurora"
+  engine_version     = "5.6.10a"
+  identifier         = "aurora-instance"
+
+  # Aurora DB 인스턴스에 태그를 지정합니다.
+  tags = {
+    Name = "Aurora DB Instance"
   }
 }
 
@@ -404,3 +508,116 @@ resource "aws_security_group" "lb_security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+
+# # AWS CloudFront Distribution 생성
+# resource "aws_cloudfront_distribution" "web_distribution" {
+#   origin {
+#     domain_name = aws_lb.main.dns_name
+#     origin_id   = aws_lb.main.dns_name
+
+#     custom_origin_config {
+#       http_port              = 80
+#       https_port             = 443
+#       origin_protocol_policy = "http-only"
+#       origin_ssl_protocols   = ["TLSv1.2"]
+#     }
+#   }
+
+#   enabled             = true
+#   is_ipv6_enabled     = true
+#   comment             = "Web distribution"
+#   default_root_object = "index.html"
+
+#   # CloudFront에 연결할 SSL 인증서 ARN
+#   viewer_certificate {
+#     acm_certificate_arn = "arn:aws:acm:us-east-1:881855020500:certificate/d082e57f-eded-41b2-b77a-54aa3d74a39c"
+#     ssl_support_method  = "sni-only"
+#   }
+#   # ALB의 DNS 이름을 CNAME으로 등록
+#   aliases = ["www.hkang.shop"]
+
+
+#   # HTTP 요청을 HTTPS로 리디렉션합니다.
+#   default_cache_behavior {
+#     cache_policy_id  = var.cache_policy_id
+#     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+#     cached_methods   = ["GET", "HEAD"]
+#     target_origin_id = aws_lb.main.dns_name
+#     compress         = true
+
+#     viewer_protocol_policy = "redirect-to-https" //http로 들어오면 https로 바꿔 cloudfront의 인증서로 처리함
+#     min_ttl                = 0
+#     default_ttl            = 3600
+#     max_ttl                = 86400
+#   }
+
+#   restrictions {
+#     geo_restriction {
+#       restriction_type = "none"
+#     }
+#   }
+
+#   tags = {
+#     Environment = "Production"
+#   }
+# }
+
+
+# resource "aws_route53_record" "www_aws" {
+#   zone_id         = var.zone_id
+#   name            = "www.${var.zone_name}"
+#   type            = "A"
+#   health_check_id = "0b289f47-057d-4649-815a-dcdd66735cdb"
+#   weighted_routing_policy {
+#     weight = 50
+#   }
+#     set_identifier = "aws"
+#   # CloudFront 배포의 도메인 이름과 호스팅 영역 ID
+#   alias {
+#     name    = aws_cloudfront_distribution.web_distribution.domain_name
+#     zone_id = aws_cloudfront_distribution.web_distribution.hosted_zone_id
+#     evaluate_target_health = false
+#   }
+# }
+
+# resource "aws_route53_health_check" "www_aws_hc" {
+#   fqdn              = aws_cloudfront_distribution.web_distribution.domain_name
+#   port              = 80
+#   type              = "HTTP"
+#   resource_path     = "/"
+#   failure_threshold = "5"
+#   request_interval  = "30"
+
+#   tags = {
+#     Name = "aws-health-check"
+#   }
+# }
+
+
+## IDC 부분 잘 안됨
+# resource "aws_route53_record" "www_idc" {
+#   zone_id         = var.zone_id
+#   name            = "www.${var.zone_name}"
+#   type            = "A"
+#   records         = ["111.67.218.43"]
+#   health_check_id = "0b289f47-057d-4649-815a-dcdd66735cdb"
+
+#   weighted_routing_policy {
+#     weight = 50
+#   }
+#       set_identifier = "idc"
+# }
+
+# resource "aws_route53_health_check" "www_idc_hc" {
+#   fqdn              = "111.67.218.43"
+#   port              = 80
+#   type              = "HTTP"
+#   resource_path     = "/"
+#   failure_threshold = "5"
+#   request_interval  = "30"
+
+#   tags = {
+#     Name = "idc-health-check"
+#   }
+# }
