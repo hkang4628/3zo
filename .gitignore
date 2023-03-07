@@ -2,4 +2,6 @@ front/node_modules
 
 backend/my_setting.py
 
-terraform/credentials
+terraform/.terraform
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
