@@ -359,42 +359,43 @@ resource "aws_launch_template" "web_launch_template" {
 }
 
 
-# Aurora DB 클러스터와 연결된 DB 서브넷 그룹을 생성합니다.
-resource "aws_db_subnet_group" "aurora_db_subnet_group" {
-  name       = "aurora-db-subnet-group"
-  subnet_ids = [ aws_subnet.private_subnet3.id ,aws_subnet.private_subnet4.id ]
-}
+# # Aurora DB 클러스터와 연결된 DB 서브넷 그룹을 생성합니다.
+# resource "aws_db_subnet_group" "aurora_db_subnet_group" {
+#   name       = "aurora-db-subnet-group"
+#   subnet_ids = [ aws_subnet.private_subnet3.id ,aws_subnet.private_subnet4.id ]
+# }
 
-# Aurora DB 클러스터를 생성합니다.
-resource "aws_rds_cluster" "aurora_cluster" {
-  cluster_identifier      = "aurora-cluster"
-  engine                  = "aurora"
-  engine_version          = "5.6.10a"
-  database_name           = "flower"
-  master_username         = "admin"
-  master_password         = "dkagh1.dkagh1."
-  backup_retention_period = 7
+# # Aurora DB 클러스터를 생성합니다.
+# resource "aws_rds_cluster" "aurora_cluster" {
+#   cluster_identifier      = "aurora-cluster"
+#   engine                  = "aurora"
+#   engine_version          = "5.7.mysql_aurora.2.03.2"
+#   database_name           = "flower"
+#   master_username         = var.master_username
+#   master_password         = var.master_password
+#   backup_retention_period = 7
 
-  # Aurora DB 클러스터와 연결된 보안 그룹을 지정합니다.
-  vpc_security_group_ids  = [aws_security_group.db_security_group.id]
+#   # Aurora DB 클러스터와 연결된 보안 그룹을 지정합니다.
+#   vpc_security_group_ids  = [aws_security_group.db_security_group.id]
 
-  # Aurora DB 클러스터와 연결된 DB 서브넷 그룹을 지정합니다.
-  db_subnet_group_name    = aws_db_subnet_group.aurora_db_subnet_group.name
-}
+#   # Aurora DB 클러스터와 연결된 DB 서브넷 그룹을 지정합니다.
+#   db_subnet_group_name    = aws_db_subnet_group.aurora_db_subnet_group.name
 
-# Aurora DB 인스턴스를 생성합니다.
-resource "aws_rds_cluster_instance" "aurora_instance" {
-  cluster_identifier = aws_rds_cluster.aurora_cluster.id
-  instance_class     = "db.t3.small"
-  engine             = "aurora"
-  engine_version     = "5.6.10a"
-  identifier         = "aurora-instance"
+# }
 
-  # Aurora DB 인스턴스에 태그를 지정합니다.
-  tags = {
-    Name = "Aurora DB Instance"
-  }
-}
+# # Aurora DB 인스턴스를 생성합니다.
+# resource "aws_rds_cluster_instance" "aurora_instance" {
+#   cluster_identifier = aws_rds_cluster.aurora_cluster.id
+#   instance_class     = var.db_instance_type
+#   engine             = "aurora"
+#   engine_version     = "5.7.mysql_aurora.2.03.2"
+#   identifier         = "aurora-instance"
+
+#   # Aurora DB 인스턴스에 태그를 지정합니다.
+#   tags = {
+#     Name = "Aurora DB Instance"
+#   }
+# }
 
 
 # Auto Scaling Group을 생성하는 코드를 작성합니다.

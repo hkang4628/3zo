@@ -25,3 +25,21 @@ variable "zone_id" {
 variable "cache_policy_id" {
   default = "658327ea-f89d-4fab-a63d-7e88639e58f6"
 }
+
+
+# DB 유저 및 Password
+variable "db_instance_type" {
+  description = "db instance type"
+  type        = string
+  default     = "db.t3.small"
+}
+
+variable "master_username" {
+  description = "(Required) Username for the master DB user"
+  type        = string
+}
+
+variable "master_password" {
+  description = "(Required) Password for the master DB user"
+  type        = string
+}
