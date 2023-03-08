@@ -372,7 +372,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   engine_version          = "5.6.10a"
   database_name           = "flower"
   master_username         = "admin"
-  master_password         = "1234"
+  master_password         = "dkagh1.dkagh1."
   backup_retention_period = 7
 
   # Aurora DB 클러스터와 연결된 보안 그룹을 지정합니다.
