@@ -813,7 +813,25 @@ resource "aws_route53_record" "www_to_aws" {
     zone_id = aws_cloudfront_distribution.web_distribution.hosted_zone_id
     evaluate_target_health = false
   }
+}
 
+# Route53 설정 부분
+resource "aws_route53_record" "blank_to_aws" {
+  zone_id         = var.zone_id
+  name            = "${var.zone_name}"
+  type            = "A"
+  health_check_id = aws_route53_health_check.www_aws_hc.id
+
+  weighted_routing_policy {
+    weight = 50
+  }
+    set_identifier = "aws"
+
+  alias {
+    name    = aws_cloudfront_distribution.web_distribution.domain_name
+    zone_id = aws_cloudfront_distribution.web_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
 }
 
 
@@ -835,6 +853,19 @@ resource "aws_route53_health_check" "www_aws_hc" {
 resource "aws_route53_record" "www_to_idc" {
   zone_id         = var.zone_id
   name            = "www.${var.zone_name}"
+  type            = "A"
+  ttl             = 5
+  health_check_id = aws_route53_health_check.www_idc_hc.id
+  weighted_routing_policy {
+    weight = 50
+  }
+    set_identifier = "idc"
+  records = ["111.67.218.43"]
+  # records = [aws_route53_record.idc_to_ip.fqdn]
+}
+resource "aws_route53_record" "blank_to_idc" {
+  zone_id         = var.zone_id
+  name            = "${var.zone_name}"
   type            = "A"
   ttl             = 5
   health_check_id = aws_route53_health_check.www_idc_hc.id
