@@ -4,10 +4,14 @@ from .models import Member, Contest
 
 import json
 import ftplib
-import os
+import socket
 
 from .models import Contest
 
+def health_check(request):
+    hostname = socket.gethostname()
+
+    return JsonResponse({'result': 'success', 'hostname': hostname})
 
 def signup(request):
     if request.method == "POST":
