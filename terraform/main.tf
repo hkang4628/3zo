@@ -40,39 +40,57 @@ resource "aws_subnet" "public_subnet2" {
 }
 
 # Private Subnet을 생성하는 코드를 작성합니다.
-resource "aws_subnet" "private_subnet1" {
+resource "aws_subnet" "web_subnet1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.10.0/24"
   availability_zone = "${var.aws_region}a"
   tags = {
-    Name = "private_subnet1"
+    Name = "web_subnet1"
   }
 }
 
-resource "aws_subnet" "private_subnet2" {
+resource "aws_subnet" "web_subnet2" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.11.0/24"
   availability_zone = "${var.aws_region}b"
   tags = {
-    Name = "private_subnet2"
+    Name = "web_subnet2"
   }
 }
 
-resource "aws_subnet" "private_subnet3" {
+resource "aws_subnet" "was_subnet1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.20.0/24"
   availability_zone = "${var.aws_region}a"
   tags = {
-    Name = "private_subnet3"
+    Name = "was_subnet1"
   }
 }
 
-resource "aws_subnet" "private_subnet4" {
+resource "aws_subnet" "was_subnet2" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.21.0/24"
   availability_zone = "${var.aws_region}b"
   tags = {
-    Name = "private_subnet4"
+    Name = "was_subnet2"
+  }
+}
+
+resource "aws_subnet" "db_subnet1" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.30.0/24"
+  availability_zone = "${var.aws_region}a"
+  tags = {
+    Name = "db_subnet1"
+  }
+}
+
+resource "aws_subnet" "db_subnet2" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.31.0/24"
+  availability_zone = "${var.aws_region}b"
+  tags = {
+    Name = "db_subnet2"
   }
 }
 
@@ -153,27 +171,40 @@ resource "aws_route_table" "private_rt2" {
 
 # 프라이빗 서브넷과 라우트 테이블 연결1
 resource "aws_route_table_association" "private_rta1" {
-  subnet_id      = aws_subnet.private_subnet1.id
+  subnet_id      = aws_subnet.web_subnet1.id
   route_table_id = aws_route_table.private_rt1.id
 }
 
 # 프라이빗 서브넷과 라우트 테이블 연결2
 resource "aws_route_table_association" "private_rta2" {
-  subnet_id      = aws_subnet.private_subnet2.id
+  subnet_id      = aws_subnet.web_subnet2.id
   route_table_id = aws_route_table.private_rt2.id
 }
 
 # 프라이빗 서브넷과 라우트 테이블 연결3
 resource "aws_route_table_association" "private_rta3" {
-  subnet_id      = aws_subnet.private_subnet3.id
+  subnet_id      = aws_subnet.was_subnet1.id
   route_table_id = aws_route_table.private_rt1.id
 }
 
 # 프라이빗 서브넷과 라우트 테이블 연결4
 resource "aws_route_table_association" "private_rta4" {
-  subnet_id      = aws_subnet.private_subnet4.id
+  subnet_id      = aws_subnet.was_subnet2.id
   route_table_id = aws_route_table.private_rt2.id
 }
+
+# 프라이빗 서브넷과 라우트 테이블 연결3
+resource "aws_route_table_association" "private_rta5" {
+  subnet_id      = aws_subnet.db_subnet1.id
+  route_table_id = aws_route_table.private_rt1.id
+}
+
+# 프라이빗 서브넷과 라우트 테이블 연결4
+resource "aws_route_table_association" "private_rta6" {
+  subnet_id      = aws_subnet.db_subnet2.id
+  route_table_id = aws_route_table.private_rt2.id
+}
+
 
 # Security Group을 생성하는 코드를 작성합니다.
 resource "aws_security_group" "web_security_group" {
@@ -192,6 +223,51 @@ resource "aws_security_group" "web_security_group" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  ingress {
+    description = "icmp"
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+
+    # Private Subnet에서 외부와 통신할 수 있도록 CIDR 블록을 지정합니다.
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Security Group을 생성하는 코드를 작성합니다.
+resource "aws_security_group" "was_security_group" {
+  vpc_id      = aws_vpc.main.id
+  name_prefix = "was-security-group"
+
+  ingress {
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "icmp"
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port = 0
     to_port   = 0
@@ -213,12 +289,8 @@ resource "aws_security_group" "db_security_group" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+
+
   egress {
     from_port = 0
     to_port   = 0
@@ -235,10 +307,18 @@ resource "aws_security_group" "https_sg" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "icmp"
+    description = "https"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "icmp"
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -255,7 +335,7 @@ resource "aws_vpc_endpoint" "ssm_endpoint" {
   vpc_id              = aws_vpc.main.id
   service_name        = "com.amazonaws.us-east-1.ssm"
   vpc_endpoint_type   = "Interface"
-  subnet_ids          = [aws_subnet.private_subnet1.id]
+  subnet_ids          = [aws_subnet.web_subnet1.id]
   security_group_ids  = [aws_security_group.https_sg.id]
   private_dns_enabled = true # private DNS 이름 활성화
   tags = {
@@ -268,7 +348,7 @@ resource "aws_vpc_endpoint" "ssmmessages_endpoint" {
   vpc_id              = aws_vpc.main.id
   service_name        = "com.amazonaws.us-east-1.ssmmessages"
   vpc_endpoint_type   = "Interface"
-  subnet_ids          = [aws_subnet.private_subnet1.id]
+  subnet_ids          = [aws_subnet.web_subnet1.id]
   security_group_ids  = [aws_security_group.https_sg.id]
   private_dns_enabled = true # private DNS 이름 활성화
   tags = {
@@ -281,7 +361,7 @@ resource "aws_vpc_endpoint" "ec2messages_endpoint" {
   vpc_id              = aws_vpc.main.id
   service_name        = "com.amazonaws.us-east-1.ec2messages"
   vpc_endpoint_type   = "Interface"
-  subnet_ids          = [aws_subnet.private_subnet1.id]
+  subnet_ids          = [aws_subnet.web_subnet1.id]
   security_group_ids  = [aws_security_group.https_sg.id]
   private_dns_enabled = true # private DNS 이름 활성화
   tags = {
@@ -358,6 +438,38 @@ resource "aws_launch_template" "web_launch_template" {
   }
 }
 
+# Launch Template을 생성하는 코드를 작성합니다.
+resource "aws_launch_template" "was_launch_template" {
+  name_prefix   = "was-lt"
+  image_id      = data.aws_ami.amazonlinux2.id
+  instance_type = var.instance_type
+  key_name      = var.key_name
+
+  # 위에서 생성한 Security Group ID를 지정합니다.
+  vpc_security_group_ids = ["${aws_security_group.was_security_group.id}"]
+
+  # IAM 인스턴스 프로필 연결
+  iam_instance_profile {
+    name = "AmazonSSMRoleForInstancesQuickSetup"
+  }
+  # EC2 인스턴스를 구성하기 위한 User Data를 작성합니다.
+  user_data = base64encode(<<-EOF
+              #!/bin/bash
+              echo "Hello, World!" > index.html
+              nohup python -m SimpleHTTPServer 8000 &
+              EOF
+  )
+
+  tag_specifications {
+    resource_type = "instance"
+
+    # EC2 인스턴스에 Name 태그를 추가합니다.
+    tags = {
+      Name = "was-instance"
+    }
+  }
+}
+
 
 # # Aurora DB 클러스터와 연결된 DB 서브넷 그룹을 생성합니다.
 # resource "aws_db_subnet_group" "aurora_db_subnet_group" {
@@ -401,7 +513,7 @@ resource "aws_launch_template" "web_launch_template" {
 # Auto Scaling Group을 생성하는 코드를 작성합니다.
 resource "aws_autoscaling_group" "web_autoscaling_group" {
   name                = "web-autoscaling-group"
-  vpc_zone_identifier = ["${aws_subnet.private_subnet1.id}", "${aws_subnet.private_subnet2.id}"]
+  vpc_zone_identifier = ["${aws_subnet.web_subnet1.id}", "${aws_subnet.web_subnet2.id}"]
 
   launch_template {
     id      = aws_launch_template.web_launch_template.id
@@ -424,24 +536,77 @@ resource "aws_autoscaling_group" "web_autoscaling_group" {
   }
 }
 
+# Auto Scaling Group을 생성하는 코드를 작성합니다.
+resource "aws_autoscaling_group" "was_autoscaling_group" {
+  name                = "was-autoscaling-group"
+  vpc_zone_identifier = ["${aws_subnet.was_subnet1.id}", "${aws_subnet.was_subnet2.id}"]
+
+  launch_template {
+    id      = aws_launch_template.was_launch_template.id
+    version = "$Latest"
+  }
+  desired_capacity          = 1
+  min_size                  = 1
+  max_size                  = 3
+  health_check_grace_period = 300
+  health_check_type         = "ELB"
+
+  # Auto Scaling Group에 Name 태그를 추가합니다.
+  tag {
+    key                 = "Name"
+    value               = "was-instance"
+    propagate_at_launch = true
+  }
+  lifecycle {
+    ignore_changes = [load_balancers, target_group_arns]
+  }
+}
+
 #Auto Scaling Group에 LB를 연결한다.
 resource "aws_autoscaling_attachment" "web_asg_attachment" {
   autoscaling_group_name = aws_autoscaling_group.web_autoscaling_group.id
   lb_target_group_arn    = aws_lb_target_group.web_target_group.arn
 }
 
+#Auto Scaling Group에 LB를 연결한다.
+resource "aws_autoscaling_attachment" "was_asg_attachment" {
+  autoscaling_group_name = aws_autoscaling_group.was_autoscaling_group.id
+  lb_target_group_arn    = aws_lb_target_group.was_target_group.arn
+}
+
 # Application Load Balancer를 생성하는 코드를 작성합니다.
-resource "aws_lb" "main" {
+resource "aws_lb" "web_lb" {
   name               = "web-lb"
   internal           = false
   load_balancer_type = "application"
 
   # Load Balancer와 Public Subnet을 연결합니다.
   subnets         = ["${aws_subnet.public_subnet1.id}", "${aws_subnet.public_subnet2.id}"]
-  security_groups = ["${aws_security_group.lb_security_group.id}"]
+  security_groups = ["${aws_security_group.web_lb_security_group.id}"]
 
   tags = {
     Name = "web-lb"
+  }
+}
+
+# Application Load Balancer를 생성하는 코드를 작성합니다.
+resource "aws_lb" "was_lb" {
+  name               = "was-lb"
+  internal           = true
+  load_balancer_type = "application"
+
+  # Load Balancer와 web Subnet을 연결합니다.
+  subnet_mapping {
+    subnet_id = aws_subnet.was_subnet1.id
+  }
+  subnet_mapping {
+    subnet_id = aws_subnet.was_subnet2.id
+  }
+
+  security_groups = ["${aws_security_group.was_lb_security_group.id}"]
+
+  tags = {
+    Name = "was-lb"
   }
 }
 
@@ -473,9 +638,37 @@ resource "aws_lb_target_group" "web_target_group" {
   }
 }
 
+# Target Group을 생성하는 코드를 작성합니다.
+resource "aws_lb_target_group" "was_target_group" {
+  name_prefix = "was-tg"
+
+  port     = 8000
+  protocol = "HTTP"
+
+  # 위에서 생성한 VPC ID를 지정합니다.
+  vpc_id = aws_vpc.main.id
+
+  target_type = "instance"
+
+  health_check {
+    path     = "/"
+    interval = 12
+    timeout  = 4
+  }
+
+  #Target Group이 생성되기 전에 아래 리소스 생성을 기다림
+  depends_on = [
+    aws_autoscaling_group.was_autoscaling_group,
+  ]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 # Listener를 생성하는 코드를 작성합니다.
 resource "aws_lb_listener" "web_listener" {
-  load_balancer_arn = aws_lb.main.arn
+  load_balancer_arn = aws_lb.web_lb.arn
   port              = "80"
   protocol          = "HTTP"
 
@@ -486,10 +679,23 @@ resource "aws_lb_listener" "web_listener" {
   }
 }
 
-# LB용 Security Group을 생성하는 코드를 작성합니다.
-resource "aws_security_group" "lb_security_group" {
+# Listener를 생성하는 코드를 작성합니다.
+resource "aws_lb_listener" "was_listener" {
+  load_balancer_arn = aws_lb.was_lb.arn
+  port              = "8000"
+  protocol          = "HTTP"
+
+  # 위에서 생성한 Target Group을 지정합니다.
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.was_target_group.arn
+  }
+}
+
+# WEB_LB용 Security Group을 생성하는 코드를 작성합니다.
+resource "aws_security_group" "web_lb_security_group" {
   vpc_id      = aws_vpc.main.id
-  name_prefix = "lb-security-group"
+  name_prefix = "web-lb-security-group"
 
   ingress {
     from_port = 80
@@ -498,6 +704,30 @@ resource "aws_security_group" "lb_security_group" {
 
     # Public Subnet에서 Application Load Balancer에 접속할 수 있도록 CIDR 블록을 지정합니다.
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+
+    # Private Subnet에서 외부와 통신할 수 있도록 CIDR 블록을 지정합니다.
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# WAS_LB용 Security Group을 생성하는 코드를 작성합니다.
+resource "aws_security_group" "was_lb_security_group" {
+  vpc_id      = aws_vpc.main.id
+  name_prefix = "was-lb-security-group"
+
+  ingress {
+    from_port = 8000
+    to_port   = 8000
+    protocol  = "tcp"
+
+    # web_lb에서 오는 트래픽만 허용
+    security_groups = [aws_security_group.web_lb_security_group.id]
   }
 
   egress {

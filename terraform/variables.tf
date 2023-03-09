@@ -27,7 +27,7 @@ variable "cache_policy_id" {
 }
 
 
-# DB 유저 및 Password
+# DB 설정
 variable "db_instance_type" {
   description = "db instance type"
   type        = string
@@ -36,10 +36,12 @@ variable "db_instance_type" {
 
 variable "master_username" {
   description = "(Required) Username for the master DB user"
-  type        = string
+  default     = "admin"
+  # type        = string
 }
 
 variable "master_password" {
   description = "(Required) Password for the master DB user"
-  type        = string
+  # type        = string
+  default = "dkagh1.dkagh1."
 }
