@@ -16,10 +16,12 @@ variable "key_name" {
 
 # Hosted zone name, id 정의
 variable "zone_name" {
-  default = "hkang.shop"
+  # default = "hkang.shop"
+  default = "flower53.site"
 }
 variable "zone_id" {
-  default = "Z093279026ZMIZQ76MIQ5"
+  # default = "Z093279026ZMIZQ76MIQ5"
+  default = "Z04776923OI5IS9HYZB43"
 }
 
 variable "cache_policy_id" {

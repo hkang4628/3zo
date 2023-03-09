@@ -741,114 +741,121 @@ resource "aws_security_group" "was_lb_security_group" {
 }
 
 
-# # AWS CloudFront Distribution 생성
-# resource "aws_cloudfront_distribution" "web_distribution" {
-#   origin {
-#     domain_name = aws_lb.main.dns_name
-#     origin_id   = aws_lb.main.dns_name
+# AWS CloudFront Distribution 생성
+resource "aws_cloudfront_distribution" "web_distribution" {
+  origin {
+    domain_name = aws_lb.web_lb.dns_name
+    origin_id   = aws_lb.web_lb.dns_name
 
-#     custom_origin_config {
-#       http_port              = 80
-#       https_port             = 443
-#       origin_protocol_policy = "http-only"
-#       origin_ssl_protocols   = ["TLSv1.2"]
-#     }
-#   }
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
 
-#   enabled             = true
-#   is_ipv6_enabled     = true
-#   comment             = "Web distribution"
-#   default_root_object = "index.html"
+  enabled             = true
+  is_ipv6_enabled     = true
+  comment             = "Web distribution"
+  default_root_object = "index.html"
 
-#   # CloudFront에 연결할 SSL 인증서 ARN
-#   viewer_certificate {
-#     acm_certificate_arn = "arn:aws:acm:us-east-1:881855020500:certificate/d082e57f-eded-41b2-b77a-54aa3d74a39c"
-#     ssl_support_method  = "sni-only"
-#   }
-#   # ALB의 DNS 이름을 CNAME으로 등록
-#   aliases = ["www.hkang.shop"]
-
-
-#   # HTTP 요청을 HTTPS로 리디렉션합니다.
-#   default_cache_behavior {
-#     cache_policy_id  = var.cache_policy_id
-#     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-#     cached_methods   = ["GET", "HEAD"]
-#     target_origin_id = aws_lb.main.dns_name
-#     compress         = true
-
-#     viewer_protocol_policy = "redirect-to-https" //http로 들어오면 https로 바꿔 cloudfront의 인증서로 처리함
-#     min_ttl                = 0
-#     default_ttl            = 3600
-#     max_ttl                = 86400
-#   }
-
-#   restrictions {
-#     geo_restriction {
-#       restriction_type = "none"
-#     }
-#   }
-
-#   tags = {
-#     Environment = "Production"
-#   }
-# }
+  # CloudFront에 연결할 SSL 인증서 ARN
+  viewer_certificate {
+    acm_certificate_arn = "arn:aws:acm:us-east-1:881855020500:certificate/8adaf04e-0de8-4078-8bd6-3b4b29da2680"
+    ssl_support_method  = "sni-only"
+  }
+  # ALB의 DNS 이름을 CNAME으로 등록
+  aliases = ["www.${var.zone_name}"]
 
 
-# resource "aws_route53_record" "www_aws" {
-#   zone_id         = var.zone_id
-#   name            = "www.${var.zone_name}"
-#   type            = "A"
-#   health_check_id = "0b289f47-057d-4649-815a-dcdd66735cdb"
-#   weighted_routing_policy {
-#     weight = 50
-#   }
-#     set_identifier = "aws"
-#   # CloudFront 배포의 도메인 이름과 호스팅 영역 ID
-#   alias {
-#     name    = aws_cloudfront_distribution.web_distribution.domain_name
-#     zone_id = aws_cloudfront_distribution.web_distribution.hosted_zone_id
-#     evaluate_target_health = false
-#   }
-# }
+  # HTTP 요청을 HTTPS로 리디렉션합니다.
+  default_cache_behavior {
+    cache_policy_id  = var.cache_policy_id
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = aws_lb.web_lb.dns_name
+    compress         = true
 
-# resource "aws_route53_health_check" "www_aws_hc" {
-#   fqdn              = aws_cloudfront_distribution.web_distribution.domain_name
-#   port              = 80
-#   type              = "HTTP"
-#   resource_path     = "/"
-#   failure_threshold = "5"
-#   request_interval  = "30"
+    viewer_protocol_policy = "redirect-to-https" //http로 들어오면 https로 바꿔 cloudfront의 인증서로 처리함
+    
+    # 기존 생성된 policy를 사용하므로 설정 안함
+    # min_ttl                = 0
+    # default_ttl            = 3600
+    # max_ttl                = 86400
+  }
 
-#   tags = {
-#     Name = "aws-health-check"
-#   }
-# }
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  tags = {
+    Environment = "Production"
+  }
+}
+
+# Route53 설정 부분
+resource "aws_route53_record" "www_to_aws" {
+  zone_id         = var.zone_id
+  name            = "www.${var.zone_name}"
+  type            = "A"
+  health_check_id = aws_route53_health_check.www_aws_hc.id
+
+  weighted_routing_policy {
+    weight = 50
+  }
+    set_identifier = "aws"
+
+  alias {
+    name    = aws_cloudfront_distribution.web_distribution.domain_name
+    zone_id = aws_cloudfront_distribution.web_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
+
+}
 
 
-## IDC 부분 잘 안됨
-# resource "aws_route53_record" "www_idc" {
-#   zone_id         = var.zone_id
-#   name            = "www.${var.zone_name}"
-#   type            = "A"
-#   records         = ["111.67.218.43"]
-#   health_check_id = "0b289f47-057d-4649-815a-dcdd66735cdb"
+resource "aws_route53_health_check" "www_aws_hc" {
+  fqdn              = aws_cloudfront_distribution.web_distribution.domain_name
+  port              = 80
+  type              = "HTTP"
+  resource_path     = "/"
+  failure_threshold = "5"
+  request_interval  = "30"
 
-#   weighted_routing_policy {
-#     weight = 50
-#   }
-#       set_identifier = "idc"
-# }
+  tags = {
+    Name = "aws-health-check"
+  }
+}
 
-# resource "aws_route53_health_check" "www_idc_hc" {
-#   fqdn              = "111.67.218.43"
-#   port              = 80
-#   type              = "HTTP"
-#   resource_path     = "/"
-#   failure_threshold = "5"
-#   request_interval  = "30"
 
-#   tags = {
-#     Name = "idc-health-check"
-#   }
-# }
+# IDC 부분
+resource "aws_route53_record" "www_to_idc" {
+  zone_id         = var.zone_id
+  name            = "www.${var.zone_name}"
+  type            = "A"
+  ttl             = 5
+  health_check_id = aws_route53_health_check.www_idc_hc.id
+  weighted_routing_policy {
+    weight = 50
+  }
+    set_identifier = "idc"
+  records = ["111.67.218.43"]
+  # records = [aws_route53_record.idc_to_ip.fqdn]
+}
+
+
+resource "aws_route53_health_check" "www_idc_hc" {
+  ip_address        = "111.67.218.43"
+  port              = 80
+  type              = "HTTP"
+  resource_path     = "/"
+  failure_threshold = "5"
+  request_interval  = "30"
+
+  tags = {
+    Name = "idc-health-check"
+  }
+}
