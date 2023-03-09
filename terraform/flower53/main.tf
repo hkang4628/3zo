@@ -468,43 +468,66 @@ resource "aws_launch_template" "was_launch_template" {
 }
 
 
-# # Aurora DB 클러스터와 연결된 DB 서브넷 그룹을 생성합니다.
-# resource "aws_db_subnet_group" "aurora_db_subnet_group" {
-#   name       = "aurora-db-subnet-group"
-#   subnet_ids = [ aws_subnet.db_subnet1.id ,aws_subnet.db_subnet2.id ]
-# }
+# Aurora DB 클러스터와 연결된 DB 서브넷 그룹을 생성합니다.
+resource "aws_db_subnet_group" "aurora_db_subnet_group" {
+  name       = "aurora-db-subnet-group"
+  subnet_ids = [aws_subnet.db_subnet1.id, aws_subnet.db_subnet2.id]
+}
 
-# # Aurora DB 클러스터를 생성합니다.
-# resource "aws_rds_cluster" "aurora_cluster" {
-#   cluster_identifier      = "aurora-cluster"
-#   engine                  = "aurora-mysql"
-#   engine_version          =  "5.7.mysql_aurora.2.11.1"
-#   database_name           = "was"
-#   master_username         = var.master_username
-#   master_password         = var.master_password
-#   backup_retention_period = 7
+# Aurora DB 클러스터를 생성합니다.
+resource "aws_rds_cluster" "aurora_cluster" {
+  cluster_identifier      = "aurora-cluster"
+  engine                  = "aurora-mysql"
+  engine_version          = "5.7.mysql_aurora.2.11.1"
+  engine_mode             = "provisioned"
+  database_name           = "was"
+  master_username         = var.master_username
+  master_password         = var.master_password
+  backup_retention_period = 7
+  skip_final_snapshot     = true
+  deletion_protection     = "false"
 
-#   # Aurora DB 클러스터와 연결된 보안 그룹을 지정합니다.
-#   vpc_security_group_ids  = [aws_security_group.db_security_group.id]
+  # Aurora DB 클러스터와 연결된 보안 그룹을 지정합니다.
+  vpc_security_group_ids = [aws_security_group.db_security_group.id]
 
-#   # Aurora DB 클러스터와 연결된 DB 서브넷 그룹을 지정합니다.
-#   db_subnet_group_name    = aws_db_subnet_group.aurora_db_subnet_group.name
+  # Aurora DB 클러스터와 연결된 DB 서브넷 그룹을 지정합니다.
+  db_subnet_group_name = aws_db_subnet_group.aurora_db_subnet_group.name
 
-# }
+  # 여기에 원하는 가용 영역을 지정합니다.
+  availability_zones = ["${var.aws_region}a", "${var.aws_region}b"]
 
-# # Aurora DB 인스턴스를 생성합니다.
-# resource "aws_rds_cluster_instance" "aurora_instance" {
-#   cluster_identifier = aws_rds_cluster.aurora_cluster.id
-#   instance_class     = var.db_instance_type
-#   engine             = aws_rds_cluster.aurora_cluster.engine
-#   engine_version     = aws_rds_cluster.aurora_cluster.engine_version
-#   identifier         = "aurora-instance"
+  # 클러스터 구성
+  cluster_members = ["aurora_instance1", "aurora_instance2"]
 
-#   # Aurora DB 인스턴스에 태그를 지정합니다.
-#   tags = {
-#     Name = "Aurora DB Instance"
-#   }
-# }
+}
+
+
+# Aurora DB 인스턴스를 생성합니다.
+resource "aws_rds_cluster_instance" "aurora_instance1" {
+  cluster_identifier = aws_rds_cluster.aurora_cluster.id
+  instance_class     = var.db_instance_type
+  engine             = aws_rds_cluster.aurora_cluster.engine
+  engine_version     = aws_rds_cluster.aurora_cluster.engine_version
+  identifier         = "aurora-instance1"
+
+  # Aurora DB 인스턴스에 태그를 지정합니다.
+  tags = {
+    Name = "Aurora DB Instance"
+  }
+}
+# Aurora DB 인스턴스를 생성합니다.
+resource "aws_rds_cluster_instance" "aurora_instance2" {
+  cluster_identifier = aws_rds_cluster.aurora_cluster.id
+  instance_class     = var.db_instance_type
+  engine             = aws_rds_cluster.aurora_cluster.engine
+  engine_version     = aws_rds_cluster.aurora_cluster.engine_version
+  identifier         = "aurora-instance2"
+
+  # Aurora DB 인스턴스에 태그를 지정합니다.
+  tags = {
+    Name = "Aurora DB Instance"
+  }
+}
 
 
 # Auto Scaling Group을 생성하는 코드를 작성합니다.
@@ -775,7 +798,7 @@ resource "aws_cloudfront_distribution" "web_distribution" {
     compress         = true
 
     viewer_protocol_policy = "redirect-to-https" //http로 들어오면 https로 바꿔 cloudfront의 인증서로 처리함
-    
+
     # 기존 생성된 policy를 사용하므로 설정 안함
     # min_ttl                = 0
     # default_ttl            = 3600
@@ -803,11 +826,11 @@ resource "aws_route53_record" "www_to_aws" {
   weighted_routing_policy {
     weight = 50
   }
-    set_identifier = "aws"
+  set_identifier = "aws"
 
   alias {
-    name    = aws_cloudfront_distribution.web_distribution.domain_name
-    zone_id = aws_cloudfront_distribution.web_distribution.hosted_zone_id
+    name                   = aws_cloudfront_distribution.web_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.web_distribution.hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -815,18 +838,18 @@ resource "aws_route53_record" "www_to_aws" {
 # Route53 설정 부분
 resource "aws_route53_record" "blank_to_aws" {
   zone_id         = var.zone_id
-  name            = "${var.zone_name}"
+  name            = var.zone_name
   type            = "A"
   health_check_id = aws_route53_health_check.www_aws_hc.id
 
   weighted_routing_policy {
     weight = 50
   }
-    set_identifier = "aws"
+  set_identifier = "aws"
 
   alias {
-    name    = aws_cloudfront_distribution.web_distribution.domain_name
-    zone_id = aws_cloudfront_distribution.web_distribution.hosted_zone_id
+    name                   = aws_cloudfront_distribution.web_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.web_distribution.hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -856,21 +879,21 @@ resource "aws_route53_record" "www_to_idc" {
   weighted_routing_policy {
     weight = 50
   }
-    set_identifier = "idc"
-  records = ["111.67.218.43"]
+  set_identifier = "idc"
+  records        = ["111.67.218.43"]
   # records = [aws_route53_record.idc_to_ip.fqdn]
 }
 resource "aws_route53_record" "blank_to_idc" {
   zone_id         = var.zone_id
-  name            = "${var.zone_name}"
+  name            = var.zone_name
   type            = "A"
   ttl             = 5
   health_check_id = aws_route53_health_check.www_idc_hc.id
   weighted_routing_policy {
     weight = 50
   }
-    set_identifier = "idc"
-  records = ["111.67.218.43"]
+  set_identifier = "idc"
+  records        = ["111.67.218.43"]
   # records = [aws_route53_record.idc_to_ip.fqdn]
 }
 
