@@ -209,7 +209,7 @@ resource "aws_route_table_association" "private_rta6" {
 # Security Group을 생성하는 코드를 작성합니다.
 resource "aws_security_group" "web_security_group" {
   vpc_id      = aws_vpc.main.id
-  name_prefix = "web-security-group"
+  name_prefix = "web-ec2-security-group"
 
   ingress {
     from_port   = 80
@@ -245,7 +245,7 @@ resource "aws_security_group" "web_security_group" {
 # Security Group을 생성하는 코드를 작성합니다.
 resource "aws_security_group" "was_security_group" {
   vpc_id      = aws_vpc.main.id
-  name_prefix = "was-security-group"
+  name_prefix = "was-ec2-security-group"
 
   ingress {
     from_port   = 8000
@@ -303,7 +303,7 @@ resource "aws_security_group" "db_security_group" {
 
 # HTTPS 포트가 열린 보안 그룹 생성
 resource "aws_security_group" "https_sg" {
-  name_prefix = "My HTTPS SG"
+  name_prefix = "ssm-security-group"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -403,6 +403,117 @@ resource "aws_vpc_endpoint" "ec2messages_endpoint" {
 #   }
 # }
 
+# WEB
+# EFS용 Security Group을 생성하는 코드를 작성합니다.
+resource "aws_security_group" "web_efs_security_group" {
+  vpc_id      = aws_vpc.main.id
+  name_prefix = "web-efs-security-group"
+
+  ingress {
+    from_port = 2049
+    to_port   = 2049
+    protocol  = "tcp"
+
+    # web_lb에서 오는 트래픽만 허용
+    security_groups = [aws_security_group.web_security_group.id]
+  }
+
+  egress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+
+    # Private Subnet에서 외부와 통신할 수 있도록 CIDR 블록을 지정합니다.
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# EFS 파일 시스템을 생성합니다.
+resource "aws_efs_file_system" "web_efs_file_system" {
+  encrypted       = false
+  throughput_mode = "bursting"
+  performance_mode= "generalPurpose"
+
+  tags = {
+    Name = "web-efs-file-system"
+  }
+
+  # EFS 파일 시스템의 저장 클래스를 지정합니다.
+  lifecycle_policy {
+    transition_to_ia = "AFTER_30_DAYS"
+  }
+}
+
+# EFS 파일 시스템의 마운트 타깃을 생성합니다.
+resource "aws_efs_mount_target" "web_efs_mount_target" {
+  file_system_id = aws_efs_file_system.web_efs_file_system.id
+  subnet_id      = aws_subnet.web_subnet1.id
+  security_groups = [aws_security_group.web_efs_security_group.id]
+}
+
+resource "aws_efs_mount_target" "web_efs_mount_target2" {
+  file_system_id = aws_efs_file_system.web_efs_file_system.id
+  subnet_id      = aws_subnet.web_subnet2.id
+  security_groups = [aws_security_group.web_efs_security_group.id]
+}
+
+# WAS
+# EFS용 Security Group을 생성하는 코드를 작성합니다.
+resource "aws_security_group" "was_efs_security_group" {
+  vpc_id      = aws_vpc.main.id
+  name_prefix = "was-efs-security-group"
+
+  ingress {
+    from_port = 2049
+    to_port   = 2049
+    protocol  = "tcp"
+
+    # web_lb에서 오는 트래픽만 허용
+    security_groups = [aws_security_group.was_security_group.id]
+  }
+
+  egress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+
+    # Private Subnet에서 외부와 통신할 수 있도록 CIDR 블록을 지정합니다.
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# EFS 파일 시스템을 생성합니다.
+resource "aws_efs_file_system" "was_efs_file_system" {
+  encrypted       = false
+  throughput_mode = "bursting"
+  performance_mode= "generalPurpose"
+
+  tags = {
+    Name = "was-efs-file-system"
+  }
+
+
+  # EFS 파일 시스템의 저장 클래스를 지정합니다.
+  lifecycle_policy {
+    transition_to_ia = "AFTER_30_DAYS"
+  }
+}
+
+# EFS 파일 시스템의 마운트 타깃을 생성합니다.
+resource "aws_efs_mount_target" "was_efs_mount_target" {
+  file_system_id = aws_efs_file_system.was_efs_file_system.id
+  subnet_id      = aws_subnet.was_subnet1.id
+  security_groups = [aws_security_group.was_efs_security_group.id]
+}
+
+resource "aws_efs_mount_target" "was_efs_mount_target2" {
+  file_system_id = aws_efs_file_system.was_efs_file_system.id
+  subnet_id      = aws_subnet.was_subnet2.id
+  security_groups = [aws_security_group.was_efs_security_group.id]
+}
+
+
+
 # Launch Template을 생성하는 코드를 작성합니다.
 resource "aws_launch_template" "web_launch_template" {
   name_prefix   = "web-lt"
@@ -467,6 +578,10 @@ resource "aws_launch_template" "was_launch_template" {
   }
 }
 
+# EBS 설정
+
+
+
 
 # Aurora DB 클러스터와 연결된 DB 서브넷 그룹을 생성합니다.
 resource "aws_db_subnet_group" "aurora_db_subnet_group" {
@@ -494,16 +609,16 @@ resource "aws_rds_cluster" "aurora_cluster" {
   db_subnet_group_name = aws_db_subnet_group.aurora_db_subnet_group.name
 
   # 여기에 원하는 가용 영역을 지정합니다.
-  availability_zones = ["${var.aws_region}a", "${var.aws_region}b"]
+  availability_zones = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
 
   # 클러스터 구성
-  cluster_members = ["aurora_instance1", "aurora_instance2"]
-
+  cluster_members = ["aurora-instance1", "aurora-instance2"] # aws_rds_cluster_instance 의 identifier와 맞춰야 함
 }
 
 
 # Aurora DB 인스턴스를 생성합니다.
 resource "aws_rds_cluster_instance" "aurora_instance1" {
+  availability_zone  = "${var.aws_region}a"
   cluster_identifier = aws_rds_cluster.aurora_cluster.id
   instance_class     = var.db_instance_type
   engine             = aws_rds_cluster.aurora_cluster.engine
@@ -517,6 +632,7 @@ resource "aws_rds_cluster_instance" "aurora_instance1" {
 }
 # Aurora DB 인스턴스를 생성합니다.
 resource "aws_rds_cluster_instance" "aurora_instance2" {
+  availability_zone  = "${var.aws_region}b"
   cluster_identifier = aws_rds_cluster.aurora_cluster.id
   instance_class     = var.db_instance_type
   engine             = aws_rds_cluster.aurora_cluster.engine
@@ -539,9 +655,9 @@ resource "aws_autoscaling_group" "web_autoscaling_group" {
     id      = aws_launch_template.web_launch_template.id
     version = "$Latest"
   }
-  desired_capacity          = 1
-  min_size                  = 1
-  max_size                  = 3
+  desired_capacity          = 2
+  min_size                  = 2
+  max_size                  = 4
   health_check_grace_period = 300
   health_check_type         = "ELB"
 
@@ -565,9 +681,9 @@ resource "aws_autoscaling_group" "was_autoscaling_group" {
     id      = aws_launch_template.was_launch_template.id
     version = "$Latest"
   }
-  desired_capacity          = 1
-  min_size                  = 1
-  max_size                  = 3
+  desired_capacity          = 2
+  min_size                  = 2
+  max_size                  = 4
   health_check_grace_period = 300
   health_check_type         = "ELB"
 
@@ -786,7 +902,7 @@ resource "aws_cloudfront_distribution" "web_distribution" {
     ssl_support_method  = "sni-only"
   }
   # ALB의 DNS 이름을 CNAME으로 등록
-  aliases = ["www.${var.zone_name}", "${var.zone_name}"]
+  aliases = ["www.${var.zone_name}"]
 
 
   # HTTP 요청을 HTTPS로 리디렉션합니다.
@@ -835,24 +951,6 @@ resource "aws_route53_record" "www_to_aws" {
   }
 }
 
-# Route53 설정 부분
-resource "aws_route53_record" "blank_to_aws" {
-  zone_id         = var.zone_id
-  name            = var.zone_name
-  type            = "A"
-  health_check_id = aws_route53_health_check.www_aws_hc.id
-
-  weighted_routing_policy {
-    weight = 50
-  }
-  set_identifier = "aws"
-
-  alias {
-    name                   = aws_cloudfront_distribution.web_distribution.domain_name
-    zone_id                = aws_cloudfront_distribution.web_distribution.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
 
 
 resource "aws_route53_health_check" "www_aws_hc" {
@@ -883,19 +981,7 @@ resource "aws_route53_record" "www_to_idc" {
   records        = ["111.67.218.43"]
   # records = [aws_route53_record.idc_to_ip.fqdn]
 }
-resource "aws_route53_record" "blank_to_idc" {
-  zone_id         = var.zone_id
-  name            = var.zone_name
-  type            = "A"
-  ttl             = 5
-  health_check_id = aws_route53_health_check.www_idc_hc.id
-  weighted_routing_policy {
-    weight = 50
-  }
-  set_identifier = "idc"
-  records        = ["111.67.218.43"]
-  # records = [aws_route53_record.idc_to_ip.fqdn]
-}
+
 
 
 resource "aws_route53_health_check" "www_idc_hc" {
@@ -910,3 +996,5 @@ resource "aws_route53_health_check" "www_idc_hc" {
     Name = "idc-health-check"
   }
 }
+
+
