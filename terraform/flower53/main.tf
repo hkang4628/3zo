@@ -786,7 +786,7 @@ resource "aws_cloudfront_distribution" "web_distribution" {
     ssl_support_method  = "sni-only"
   }
   # ALB의 DNS 이름을 CNAME으로 등록
-  aliases = ["www.${var.zone_name}"]
+  aliases = ["www.${var.zone_name}", "${var.zone_name}"]
 
 
   # HTTP 요청을 HTTPS로 리디렉션합니다.
