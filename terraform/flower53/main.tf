@@ -655,9 +655,9 @@ resource "aws_autoscaling_group" "web_autoscaling_group" {
     id      = aws_launch_template.web_launch_template.id
     version = "$Latest"
   }
-  desired_capacity          = 2
-  min_size                  = 2
-  max_size                  = 4
+  desired_capacity          = var.web_autoscaling_group["desired_capacity"]
+  min_size                  = var.web_autoscaling_group["min_size"]
+  max_size                  = var.web_autoscaling_group["max_size"]
   health_check_grace_period = 300
   health_check_type         = "ELB"
 
@@ -681,9 +681,9 @@ resource "aws_autoscaling_group" "was_autoscaling_group" {
     id      = aws_launch_template.was_launch_template.id
     version = "$Latest"
   }
-  desired_capacity          = 2
-  min_size                  = 2
-  max_size                  = 4
+  desired_capacity          = var.was_autoscaling_group["desired_capacity"]
+  min_size                  = var.was_autoscaling_group["min_size"]
+  max_size                  = var.was_autoscaling_group["max_size"]
   health_check_grace_period = 300
   health_check_type         = "ELB"
 
@@ -902,7 +902,7 @@ resource "aws_cloudfront_distribution" "web_distribution" {
     ssl_support_method  = "sni-only"
   }
   # ALB의 DNS 이름을 CNAME으로 등록
-  aliases = ["www.${var.zone_name}"]
+  aliases = ["www.${var.zone_name}", "aws.${var.zone_name}"]
 
 
   # HTTP 요청을 HTTPS로 리디렉션합니다.
@@ -951,6 +951,19 @@ resource "aws_route53_record" "www_to_aws" {
   }
 }
 
+resource "aws_route53_record" "aws_to_aws" {
+  zone_id         = var.zone_id
+  name            = "aws.${var.zone_name}"
+  type            = "A"
+  health_check_id = aws_route53_health_check.www_aws_hc.id
+
+  alias {
+    name                   = aws_cloudfront_distribution.web_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.web_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
 
 
 resource "aws_route53_health_check" "www_aws_hc" {
@@ -982,7 +995,15 @@ resource "aws_route53_record" "www_to_idc" {
   # records = [aws_route53_record.idc_to_ip.fqdn]
 }
 
-
+resource "aws_route53_record" "idc_to_idc" {
+  zone_id         = var.zone_id
+  name            = "idc.${var.zone_name}"
+  type            = "A"
+  ttl             = 5
+  
+  records        = ["111.67.218.43"]
+  # records = [aws_route53_record.idc_to_ip.fqdn]
+}
 
 resource "aws_route53_health_check" "www_idc_hc" {
   ip_address        = "111.67.218.43"

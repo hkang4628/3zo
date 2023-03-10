@@ -47,3 +47,21 @@ variable "master_password" {
   # type        = string
   default = "dkagh1.dkagh1."
 }
+
+variable "web_autoscaling_group" {
+  type = map(string)
+  default = {
+    desired_capacity  = 2
+    min_size          = 2
+    max_size          = 4
+  }
+}
+
+variable "was_autoscaling_group" {
+  type = map(string)
+  default = {
+    desired_capacity  = 2
+    min_size          = 2
+    max_size          = 4
+  }
+}
