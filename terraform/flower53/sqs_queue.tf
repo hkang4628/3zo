@@ -3,6 +3,7 @@ resource "aws_sqs_queue" "thumbnail_queue" {
   fifo_queue                        = "false"
 
 }
+
 resource "aws_sqs_queue_policy" "thumbnail_queue_policy" {
   queue_url = aws_sqs_queue.thumbnail_queue.id
   policy = jsonencode(
