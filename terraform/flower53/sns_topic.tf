@@ -9,33 +9,24 @@ arn   =   aws_sns_topic.s3_event_topic.arn
 
 policy = jsonencode(
 {
-  "Id": "__default_policy_ID",
+  "Version": "2012-10-17",
+  "Id": "default-id",
   "Statement": [
     {
-      "Action": [
-        "SNS:GetTopicAttributes",
-        "SNS:SetTopicAttributes",
-        "SNS:AddPermission",
-        "SNS:RemovePermission",
-        "SNS:DeleteTopic",
-        "SNS:Subscribe",
-        "SNS:ListSubscriptionsByTopic",
-        "SNS:Publish"
-      ],
-      "Condition": {
-        "StringEquals": {
-          "AWS:SourceOwner": "881855020500"
-        }
-      },
+      "Sid": "default-statement-id",
       "Effect": "Allow",
       "Principal": {
         "AWS": "*"
       },
-      "Resource": "${aws_sns_topic.s3_event_topic.arn}",
-      "Sid": "__default_statement_ID"
+      "Action": "SNS:Publish",
+      "Resource": "arn:aws:sns:us-west-2:881855020500:s3_event_topic",
+      "Condition": {
+        "ArnLike": {
+          "aws:SourceArn": "arn:aws:s3:::flower53-image-bucket"
+        }
+      }
     }
-  ],
-  "Version": "2008-10-17"
+  ]
 })
 }
 
