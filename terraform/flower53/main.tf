@@ -430,9 +430,9 @@ resource "aws_security_group" "web_efs_security_group" {
 
 # EFS 파일 시스템을 생성합니다.
 resource "aws_efs_file_system" "web_efs_file_system" {
-  encrypted       = false
-  throughput_mode = "bursting"
-  performance_mode= "generalPurpose"
+  encrypted        = false
+  throughput_mode  = "bursting"
+  performance_mode = "generalPurpose"
 
   tags = {
     Name = "web-efs-file-system"
@@ -446,14 +446,14 @@ resource "aws_efs_file_system" "web_efs_file_system" {
 
 # EFS 파일 시스템의 마운트 타깃을 생성합니다.
 resource "aws_efs_mount_target" "web_efs_mount_target" {
-  file_system_id = aws_efs_file_system.web_efs_file_system.id
-  subnet_id      = aws_subnet.web_subnet1.id
+  file_system_id  = aws_efs_file_system.web_efs_file_system.id
+  subnet_id       = aws_subnet.web_subnet1.id
   security_groups = [aws_security_group.web_efs_security_group.id]
 }
 
 resource "aws_efs_mount_target" "web_efs_mount_target2" {
-  file_system_id = aws_efs_file_system.web_efs_file_system.id
-  subnet_id      = aws_subnet.web_subnet2.id
+  file_system_id  = aws_efs_file_system.web_efs_file_system.id
+  subnet_id       = aws_subnet.web_subnet2.id
   security_groups = [aws_security_group.web_efs_security_group.id]
 }
 
@@ -484,9 +484,9 @@ resource "aws_security_group" "was_efs_security_group" {
 
 # EFS 파일 시스템을 생성합니다.
 resource "aws_efs_file_system" "was_efs_file_system" {
-  encrypted       = false
-  throughput_mode = "bursting"
-  performance_mode= "generalPurpose"
+  encrypted        = false
+  throughput_mode  = "bursting"
+  performance_mode = "generalPurpose"
 
   tags = {
     Name = "was-efs-file-system"
@@ -501,14 +501,14 @@ resource "aws_efs_file_system" "was_efs_file_system" {
 
 # EFS 파일 시스템의 마운트 타깃을 생성합니다.
 resource "aws_efs_mount_target" "was_efs_mount_target" {
-  file_system_id = aws_efs_file_system.was_efs_file_system.id
-  subnet_id      = aws_subnet.was_subnet1.id
+  file_system_id  = aws_efs_file_system.was_efs_file_system.id
+  subnet_id       = aws_subnet.was_subnet1.id
   security_groups = [aws_security_group.was_efs_security_group.id]
 }
 
 resource "aws_efs_mount_target" "was_efs_mount_target2" {
-  file_system_id = aws_efs_file_system.was_efs_file_system.id
-  subnet_id      = aws_subnet.was_subnet2.id
+  file_system_id  = aws_efs_file_system.was_efs_file_system.id
+  subnet_id       = aws_subnet.was_subnet2.id
   security_groups = [aws_security_group.was_efs_security_group.id]
 }
 
@@ -996,12 +996,12 @@ resource "aws_route53_record" "www_to_idc" {
 }
 
 resource "aws_route53_record" "idc_to_idc" {
-  zone_id         = var.zone_id
-  name            = "idc.${var.zone_name}"
-  type            = "A"
-  ttl             = 5
-  
-  records        = ["111.67.218.43"]
+  zone_id = var.zone_id
+  name    = "idc.${var.zone_name}"
+  type    = "A"
+  ttl     = 5
+
+  records = ["111.67.218.43"]
   # records = [aws_route53_record.idc_to_ip.fqdn]
 }
 

@@ -45,23 +45,23 @@ variable "master_username" {
 variable "master_password" {
   description = "(Required) Password for the master DB user"
   # type        = string
-  default = "dkagh1.dkagh1."
+  default = "It12345!"
 }
 
 variable "web_autoscaling_group" {
   type = map(string)
   default = {
-    desired_capacity  = 2
-    min_size          = 2
-    max_size          = 4
+    desired_capacity = 2
+    min_size         = 2
+    max_size         = 4
   }
 }
 
 variable "was_autoscaling_group" {
   type = map(string)
   default = {
-    desired_capacity  = 2
-    min_size          = 2
-    max_size          = 4
+    desired_capacity = 2
+    min_size         = 2
+    max_size         = 4
   }
 }
