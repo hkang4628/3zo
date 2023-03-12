@@ -2,7 +2,7 @@
 # Launch Template을 생성하는 코드를 작성합니다.
 resource "aws_launch_template" "web_launch_template" {
   name_prefix   = "web-lt"
-  image_id      = data.aws_ami.amazonlinux2.id
+  image_id      = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   key_name      = var.key_name
 
@@ -47,7 +47,7 @@ resource "aws_launch_template" "web_launch_template" {
 # Launch Template을 생성하는 코드를 작성합니다.
 resource "aws_launch_template" "was_launch_template" {
   name_prefix   = "was-lt"
-  image_id      = data.aws_ami.amazonlinux2.id
+  image_id      = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   key_name      = var.key_name
 
@@ -62,7 +62,7 @@ resource "aws_launch_template" "was_launch_template" {
   user_data = base64encode(<<-EOF
               #!/bin/bash
               echo "Hello, World!" > index.html
-              nohup python -m SimpleHTTPServer 80 &
+              nohup python -m SimpleHTTPServer 8000 &
 
               mkdir /efs
               apt-get update

@@ -8,7 +8,6 @@ variable "instance_type" {
   default = "t2.micro"
 }
 
-
 # EC2 인스턴스에 연결할 Key Pair의 이름을 정의합니다.
 variable "key_name" {
   default = "my-key"
