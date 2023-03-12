@@ -1,4 +1,4 @@
-# IAM 역할 생성
+# Lambda용 IAM 역할 생성
 resource "aws_iam_role" "lambda_role" {
   name = "lambda_role"
 
@@ -22,6 +22,36 @@ resource "aws_iam_policy_attachment" "lambda_default_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
   roles      = [aws_iam_role.lambda_role.name]
 }
+
+
+# EC2용 IAM 역할 생성
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+    # 정책 연결
+  managed_policy_arns  = [aws_iam_policy.s3_policy.arn, "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore", "arn:aws:iam::aws:policy/AmazonSSMPatchAssociation"]
+}
+
+# Instance profile 연결 
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+  name = "ec2_instance_profile"
+  path = "/"
+  role = aws_iam_role.ec2_role.name
+}
+
 
 
 # S3 접근 권한을 위한 IAM 정책 생성
