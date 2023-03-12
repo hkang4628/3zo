@@ -1,4 +1,4 @@
-# Lambda 함수 생성
+# Resizing Lambda 함수 생성
 resource "aws_lambda_function" "resizing_lambda" {
   description      = "Create a resized image"
   filename         = "lambda_src/CreateResizedImage.zip"
@@ -22,7 +22,7 @@ resource "aws_lambda_function" "resizing_lambda" {
   }
 }
 
-
+# Trigger mapping
 resource "aws_lambda_event_source_mapping" "resizing_event_source_mapping" {
   batch_size                         = "1"
   bisect_batch_on_function_error     = "false"
@@ -32,7 +32,8 @@ resource "aws_lambda_event_source_mapping" "resizing_event_source_mapping" {
 }
 
 
-# Lambda 함수 생성
+
+# Thumbnail Lambda 함수 생성
 resource "aws_lambda_function" "thumbnail_lambda" {
   description      = "Create a thumbnail image"
   filename         = "lambda_src/CreateThumbnailImage.zip"
@@ -56,11 +57,28 @@ resource "aws_lambda_function" "thumbnail_lambda" {
   }
 }
 
-
 resource "aws_lambda_event_source_mapping" "thumbnail_event_source_mapping" {
   batch_size                         = "1"
   bisect_batch_on_function_error     = "false"
   enabled                            = "true"
   event_source_arn                   = aws_sqs_queue.thumbnail_queue.arn
   function_name                      = aws_lambda_function.thumbnail_lambda.arn
+}
+
+
+
+# ses Lambda 함수 생성
+resource "aws_lambda_function" "ses_lambda" {
+  description      = "use SES to send mail"
+  filename         = "lambda_src/SendMail.zip"
+  function_name    = "ses_mail"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "SendMail.handler"
+  runtime          = "python3.7"
+  source_code_hash = filebase64sha256("lambda_src/SendMail.zip")
+
+  # 람다 함수에 대한 메모리와 시간 제한 설정
+  memory_size = 128
+  timeout     = 3
+
 }

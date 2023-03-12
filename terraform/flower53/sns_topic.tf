@@ -10,10 +10,10 @@ resource "aws_sns_topic_policy" "sns_topic_policy" {
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
-      "Id" : "default-id",
+      "Id" : "s3-event-topic",
       "Statement" : [
         {
-          "Sid" : "default-statement-id",
+          "Sid" : "s3-event-topic-statement",
           "Effect" : "Allow",
           "Principal" : {
             "AWS" : "*"
@@ -41,4 +41,11 @@ resource "aws_sns_topic_subscription" "resizing_queue_subscription" {
   topic_arn = aws_sns_topic.s3_event_topic.arn
   protocol  = "sqs"
   endpoint  = aws_sqs_queue.resizing_queue.arn
+}
+
+resource "aws_sns_topic_subscription" "ses_lambda_subscription" {
+  topic_arn = aws_sns_topic.s3_event_topic.arn
+  protocol  = "lambda"
+  raw_message_delivery = "false"
+  endpoint  = aws_lambda_function.ses_lambda.arn
 }
