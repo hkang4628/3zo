@@ -16,9 +16,6 @@ resource "aws_launch_template" "web_launch_template" {
   # EC2 인스턴스를 구성하기 위한 User Data를 작성합니다.
   user_data = base64encode(<<-EOF
               #!/bin/bash
-              echo "Hello, World!" > index.html
-              nohup python -m SimpleHTTPServer 80 &
-
               mkdir /efs
               apt-get update
               apt-get -y install git binutils
@@ -61,9 +58,6 @@ resource "aws_launch_template" "was_launch_template" {
   # EC2 인스턴스를 구성하기 위한 User Data를 작성합니다.
   user_data = base64encode(<<-EOF
               #!/bin/bash
-              echo "Hello, World!" > index.html
-              nohup python -m SimpleHTTPServer 8000 &
-
               mkdir /efs
               apt-get update
               apt-get -y install git binutils

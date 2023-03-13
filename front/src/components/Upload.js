@@ -4,6 +4,8 @@ import { userInfoState } from "../state/atom";
 import axios from "axios";
 import "../styles/Upload.css";
 
+import { SERVER_URL } from "../constants";
+
 const Upload = ({ onCancel, onSubmit }) => {
   const [userInfo, setUserInfo] = useRecoilState(userInfoState);
   const [userInput, setUserInput] = useState({
@@ -37,7 +39,7 @@ const Upload = ({ onCancel, onSubmit }) => {
       formData.append("image", image);
       console.log(userInput);
       console.log(userInfo);
-      const res = await axios.post("http://localhost:8000/upload/", formData);
+      const res = await axios.post(`${SERVER_URL}/upload/`, formData);
       //   const res = await axios.post("http://localhost:8000/upload/", {
       //     id: "id",
       //   });

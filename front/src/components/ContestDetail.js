@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-
 import axios from "axios";
+
+import { SERVER_URL } from "../constants";
 
 import "../styles/ContestDetail.css";
 
@@ -15,7 +16,7 @@ export default function ContestDetail() {
   // id와 name을 사용하여 서버에서 데이터를 가져오는 코드
   useEffect(() => {
     axios
-      .get(`http://localhost:8000/contest_detail/?id=${id}`)
+      .get(`${SERVER_URL}/contest_detail/?id=${id}`)
       .then((response) => {
         setContest(response.data);
       })

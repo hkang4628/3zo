@@ -4,6 +4,8 @@ import { useRecoilState } from "recoil";
 import { loginState, userInfoState } from "../state/atom";
 import mainImg from "../static/images/login_img.jpg";
 
+import { SERVER_URL } from "../constants";
+
 import "../styles/Login.css";
 import axios from "axios";
 
@@ -40,7 +42,7 @@ const Login = () => {
     const { id, pw } = event.target.elements;
 
     try {
-      const response = await axios.post("http://localhost:8000/login/", {
+      const response = await axios.post(`${SERVER_URL}/login/`, {
         id: id.value,
         pw: pw.value,
       });

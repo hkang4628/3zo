@@ -50,8 +50,8 @@ variable "master_password" {
 variable "web_autoscaling_group" {
   type = map(string)
   default = {
-    desired_capacity = 2
-    min_size         = 2
+    desired_capacity = 1
+    min_size         = 1
     max_size         = 4
   }
 }
@@ -59,8 +59,8 @@ variable "web_autoscaling_group" {
 variable "was_autoscaling_group" {
   type = map(string)
   default = {
-    desired_capacity = 2
-    min_size         = 2
+    desired_capacity = 1
+    min_size         = 1
     max_size         = 4
   }
 }

@@ -207,8 +207,8 @@ resource "aws_security_group" "was_lb_security_group" {
     to_port   = 8000
     protocol  = "tcp"
 
-    # web_lb에서 오는 트래픽만 허용
-    security_groups = [aws_security_group.web_lb_security_group.id]
+    # web_ec2 에서 오는 트래픽만 허용
+    security_groups = [aws_security_group.web_security_group.id]
   }
 
   egress {

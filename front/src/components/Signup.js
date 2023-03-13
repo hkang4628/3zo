@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+import { SERVER_URL } from "../constants";
+
 import "../styles/Signup.css";
 import mainImg from "../static/images/signup_img.jpg";
 
@@ -26,7 +28,7 @@ const Signup = () => {
     const { id, pw, name, phone, email } = event.target.elements;
 
     try {
-      const response = await axios.post("http://localhost:8000/signup/", {
+      const response = await axios.post(`${SERVER_URL}`, {
         id: id.value,
         pw: pw.value,
         name: name.value,
