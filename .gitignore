@@ -6,7 +6,6 @@ backend/**/my_setting.py
 backend/**/*.pyc
 backend/**/__pycache__/
 
-<<<<<<< HEAD
 # terraform
 terraform/**/.terraform
 terraform/**/terraform.tfstate
@@ -14,8 +13,3 @@ terraform/**/terraform.tfstate.backup
 
 # etc
 *.exe
-=======
-terraform/.terraform
-terraform/terraform.tfstate
-terraform/terraform.tfstate.backup
->>>>>>> b81f7b2f1958348f5c3f19f27ae1548a47114574
