@@ -19,10 +19,10 @@ resource "aws_sns_topic_policy" "sns_topic_policy" {
             "AWS" : "*"
           },
           "Action" : "SNS:Publish",
-          "Resource" : "arn:aws:sns:us-west-2:881855020500:s3_event_topic",
+          "Resource" : "arn:aws:sns:${var.aws_region}:881855020500:s3_event_topic",
           "Condition" : {
             "ArnLike" : {
-              "aws:SourceArn" : "arn:aws:s3:::flower53-image-bucket"
+              "aws:SourceArn" : "${aws_s3_bucket.s3_bucket.arn}"
             }
           }
         }

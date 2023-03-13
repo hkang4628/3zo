@@ -16,7 +16,7 @@ resource "aws_sqs_queue_policy" "thumbnail_queue_policy" {
           "Principal" : {
             "AWS" : "arn:aws:iam::881855020500:root"
           },
-          "Resource" : "arn:aws:sqs:us-west-2:881855020500:thumbnail_queue",
+          "Resource" : "arn:aws:sqs:${var.aws_region}:881855020500:thumbnail_queue",
           "Sid" : "__owner_statement"
         },
         {
@@ -30,7 +30,7 @@ resource "aws_sqs_queue_policy" "thumbnail_queue_policy" {
           "Principal" : {
             "AWS" : "*"
           },
-          "Resource" : "arn:aws:sqs:us-west-2:881855020500:thumbnail_queue",
+          "Resource" : "arn:aws:sqs:${var.aws_region}:881855020500:thumbnail_queue",
           "Sid" : "topic-subscription-arn:${aws_sns_topic.s3_event_topic.arn}"
         }
       ],
@@ -57,7 +57,7 @@ resource "aws_sqs_queue_policy" "resizing_queue_policy" {
           "Principal" : {
             "AWS" : "arn:aws:iam::881855020500:root"
           },
-          "Resource" : "arn:aws:sqs:us-west-2:881855020500:resizing_queue",
+          "Resource" : "arn:aws:sqs:${var.aws_region}:881855020500:resizing_queue",
           "Sid" : "__owner_statement"
         },
         {
@@ -71,7 +71,7 @@ resource "aws_sqs_queue_policy" "resizing_queue_policy" {
           "Principal" : {
             "AWS" : "*"
           },
-          "Resource" : "arn:aws:sqs:us-west-2:881855020500:resizing_queue",
+          "Resource" : "arn:aws:sqs:${var.aws_region}:881855020500:resizing_queue",
           "Sid" : "topic-subscription-arn:${aws_sns_topic.s3_event_topic.arn}"
         }
       ],
