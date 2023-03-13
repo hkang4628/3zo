@@ -4,4 +4,6 @@ backend/my_setting.py
 *.pyc
 __pycache__/
 
-terraform/credentials
+terraform/.terraform
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
