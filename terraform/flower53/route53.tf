@@ -21,7 +21,6 @@ resource "aws_route53_record" "aws_to_aws" {
   zone_id         = var.zone_id
   name            = "aws.${var.zone_name}"
   type            = "A"
-  health_check_id = aws_route53_health_check.www_aws_hc.id
 
   alias {
     name                   = aws_cloudfront_distribution.web_distribution.domain_name

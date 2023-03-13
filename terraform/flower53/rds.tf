@@ -10,7 +10,6 @@ resource "aws_rds_cluster" "aurora_cluster" {
   engine                  = "aurora-mysql"
   engine_version          = "5.7.mysql_aurora.2.11.1"
   engine_mode             = "provisioned"
-  database_name           = "was"
   master_username         = var.master_username
   master_password         = var.master_password
   backup_retention_period = 7
@@ -24,7 +23,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   db_subnet_group_name = aws_db_subnet_group.aurora_db_subnet_group.name
 
   # 여기에 원하는 가용 영역을 지정합니다.
-  availability_zones = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
+  # availability_zones = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
 
   # 클러스터 구성
   cluster_members = ["aurora-instance1", "aurora-instance2"] # aws_rds_cluster_instance 의 identifier와 맞춰야 함

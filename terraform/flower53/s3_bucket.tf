@@ -1,7 +1,7 @@
 # S3 설정 부분
 resource "aws_s3_bucket" "s3_bucket" {
   bucket = "flower53-image-bucket"
-
+  
   tags = {
     Name = "Image bucket"
   }
@@ -28,14 +28,39 @@ resource "aws_s3_bucket_acl" "s3_bucket_acl" {
   acl    = "private"
 }
 
-resource "aws_s3_bucket_notification" "bucket_notification" {
+resource "aws_s3_bucket_object" "origin_folder" {
   bucket = aws_s3_bucket.s3_bucket.id
+  key    = "origin/"
 
-  topic {
-    id            = "s3_upload_notification"
-    topic_arn     = aws_sns_topic.s3_event_topic.arn
-    events        = ["s3:ObjectCreated:*"]
-    filter_prefix = "origin/"
-    # filter_suffix = ".jpg"
-  }
+  content_type = "text/plain"
+  content      = "This is the Origin directory"
 }
+
+resource "aws_s3_bucket_object" "thumbnail_folder" {
+  bucket = aws_s3_bucket.s3_bucket.id
+  key    = "thumbnail/"
+
+  content_type = "text/plain"
+  content      = "This is the Thumbnail directory"
+}
+
+resource "aws_s3_bucket_object" "resized_folder" {
+  bucket = aws_s3_bucket.s3_bucket.id
+  key    = "resized/"
+
+  content_type = "text/plain"
+  content      = "This is the Resized directory"
+}
+
+# S3 버킷 생성 후 디렉토리 만들고 실행
+# resource "aws_s3_bucket_notification" "bucket_notification" {
+#   bucket = aws_s3_bucket.s3_bucket.id
+
+#   topic {
+#     id            = "s3_upload_notification"
+#     topic_arn     = aws_sns_topic.s3_event_topic.arn
+#     events        = ["s3:ObjectCreated:*"]
+#     filter_prefix = "origin/"
+#     # filter_suffix = ".jpg"
+#   }
+# }
