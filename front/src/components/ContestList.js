@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { loginState, userInfoState } from "../state/atom";
 import axios from "axios";
-import testImg from "../static/images/contest/3.jpg";
 
 import "../styles/ContestList.css";
 
@@ -15,7 +14,7 @@ const ContestList = () => {
 
   useEffect(() => {
     axios
-      .get("http://111.67.218.43:8000/contest_list/")
+      .get("http://localhost:8000/contest_list/")
       .then((response) => setContests(response.data))
       .catch((error) => console.error(error));
   }, []);
@@ -40,11 +39,8 @@ const ContestList = () => {
       <div className="contest-list">
         {contests.map((contest) => (
           <div className="contest" key={contest.id}>
-            <Link
-              to={`http://111.67.218.43:3000/contest-detail?id=${contest.id}`}
-            >
-              {/* <img src={contest.thumbnail} alt={contest.title} /> */}
-              <img src={testImg} alt={contest.title} />
+            <Link to={`http://localhost:3000/contest-detail?id=${contest.id}`}>
+              <img src={contest.thumbnail} alt={contest.title} />
               <div className="contest-content">
                 <h2 className="contest-title">{contest.title}</h2>
                 <p className="contest-member_name">{contest.member_name}</p>

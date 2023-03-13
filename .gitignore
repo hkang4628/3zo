@@ -1,7 +1,15 @@
-front/node_modules
+#front end
+front/**/node_modules
 
-backend/my_setting.py
-*.pyc
-__pycache__/
+# backend
+backend/**/my_setting.py
+backend/**/*.pyc
+backend/**/__pycache__/
 
-terraform/credentials
+# terraform
+terraform/**/.terraform
+terraform/**/terraform.tfstate
+terraform/**/terraform.tfstate.backup
+
+# etc
+*.exe

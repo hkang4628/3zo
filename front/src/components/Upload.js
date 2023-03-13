@@ -37,10 +37,7 @@ const Upload = ({ onCancel, onSubmit }) => {
       formData.append("image", image);
       console.log(userInput);
       console.log(userInfo);
-      const res = await axios.post(
-        "http://111.67.218.43:8000/upload/",
-        formData
-      );
+      const res = await axios.post("http://localhost:8000/upload/", formData);
       //   const res = await axios.post("http://localhost:8000/upload/", {
       //     id: "id",
       //   });
