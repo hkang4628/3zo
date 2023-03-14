@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useRecoilState } from "recoil";
+import { useNavigate } from "react-router-dom";
 import { userInfoState } from "../state/atom";
 import axios from "axios";
 import "../styles/Upload.css";
@@ -13,6 +14,7 @@ const Upload = ({ onCancel, onSubmit }) => {
     location: "",
   });
   const [image, setImage] = useState("");
+  const navigate = useNavigate();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -39,23 +41,15 @@ const Upload = ({ onCancel, onSubmit }) => {
       formData.append("image", image);
       console.log(userInput);
       console.log(userInfo);
-      const res = await axios.post(`${SERVER_URL}/upload/`, formData);
-      //   const res = await axios.post("http://localhost:8000/upload/", {
-      //     id: "id",
-      //   });
-      const contestId = res.data.id;
-      //   console.log(res);
-      //     if (image) {
-      //       const imageData = new FormData();
-      //       imageData.append("image", image);
-      //       const config = { headers: { "content-type": "multipart/form-data" } };
-      //       const response = await axios.post(
-      //         `http://localhost:8000/upload/${contestId}/image/`,
-      //         imageData,
-      //         config
-      //       );
-      //       const { imageUrl } = response.data;
-      //     }
+
+      const response = await axios.post(`${SERVER_URL}/upload/`, formData);
+      alert("파일을 업로드 하는 중입니다. 잠시만 기다려 주세요");
+      if (response.data.result == "success") {
+        alert(`공모전 등록 성공 메일을 확인해주세요`);
+        // navigate("/home");
+      } else {
+        console.log(response);
+      }
     } catch (error) {
       console.error(error);
     }
