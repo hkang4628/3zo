@@ -44,8 +44,8 @@ resource "aws_sns_topic_subscription" "resizing_queue_subscription" {
 }
 
 resource "aws_sns_topic_subscription" "ses_lambda_subscription" {
-  topic_arn = aws_sns_topic.s3_event_topic.arn
-  protocol  = "lambda"
+  topic_arn            = aws_sns_topic.s3_event_topic.arn
+  protocol             = "lambda"
   raw_message_delivery = "false"
-  endpoint  = aws_lambda_function.ses_lambda.arn
+  endpoint             = aws_lambda_function.ses_lambda.arn
 }

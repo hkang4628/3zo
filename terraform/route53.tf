@@ -1,4 +1,5 @@
 # Route53 설정 부분
+# www.flower53.site weighted_routing
 resource "aws_route53_record" "www_to_aws" {
   zone_id         = var.zone_id
   name            = "www.${var.zone_name}"
@@ -17,10 +18,11 @@ resource "aws_route53_record" "www_to_aws" {
   }
 }
 
+# aws.flower53.site
 resource "aws_route53_record" "aws_to_aws" {
-  zone_id         = var.zone_id
-  name            = "aws.${var.zone_name}"
-  type            = "A"
+  zone_id = var.zone_id
+  name    = "aws.${var.zone_name}"
+  type    = "A"
 
   alias {
     name                   = aws_cloudfront_distribution.web_distribution.domain_name
@@ -29,6 +31,33 @@ resource "aws_route53_record" "aws_to_aws" {
   }
 }
 
+
+# proxy.flower53.site
+resource "aws_route53_record" "proxy_to_web_was" {
+  zone_id = var.zone_id
+  name    = "proxy.${var.zone_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.web_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.web_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+
+# s3.flower53.site
+resource "aws_route53_record" "s3_to_s3" {
+  zone_id = var.zone_id
+  name    = "s3.${var.zone_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.s3_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.s3_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
 
 
 resource "aws_route53_health_check" "www_aws_hc" {
@@ -46,6 +75,7 @@ resource "aws_route53_health_check" "www_aws_hc" {
 
 
 # IDC 부분
+# www.flower53.site weighted_routing
 resource "aws_route53_record" "www_to_idc" {
   zone_id         = var.zone_id
   name            = "www.${var.zone_name}"
@@ -60,6 +90,7 @@ resource "aws_route53_record" "www_to_idc" {
   # records = [aws_route53_record.idc_to_ip.fqdn]
 }
 
+# idc.flower53.site
 resource "aws_route53_record" "idc_to_idc" {
   zone_id = var.zone_id
   name    = "idc.${var.zone_name}"
@@ -82,3 +113,5 @@ resource "aws_route53_health_check" "www_idc_hc" {
     Name = "idc-health-check"
   }
 }
+
+

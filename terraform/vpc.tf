@@ -118,7 +118,7 @@ resource "aws_route_table_association" "public_rta2" {
 resource "aws_nat_gateway" "ngw1" {
   allocation_id = aws_eip.eip1.id
   subnet_id     = aws_subnet.public_subnet1.id
-    tags = {
+  tags = {
     Name = "NGW1"
   }
 }

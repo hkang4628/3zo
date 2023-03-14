@@ -12,23 +12,23 @@ resource "aws_lambda_function" "resizing_lambda" {
   memory_size = 128
   timeout     = 3
 
-# Lambda에서 사용할 환경변수 설정
- environment {
+  # Lambda에서 사용할 환경변수 설정
+  environment {
     variables = {
-      S3_BUCKET_NAME   = aws_s3_bucket.s3_bucket.bucket
+      S3_BUCKET_NAME      = aws_s3_bucket.s3_bucket.bucket
       RESIZED_BUCKET_NAME = aws_s3_bucket.s3_bucket.bucket
-      SQS_QUEUE_NAME = aws_sqs_queue.resizing_queue.name
+      SQS_QUEUE_NAME      = aws_sqs_queue.resizing_queue.name
     }
   }
 }
 
 # Trigger mapping
 resource "aws_lambda_event_source_mapping" "resizing_event_source_mapping" {
-  batch_size                         = "1"
-  bisect_batch_on_function_error     = "false"
-  enabled                            = "true"
-  event_source_arn                   = aws_sqs_queue.resizing_queue.arn
-  function_name                      = aws_lambda_function.resizing_lambda.arn
+  batch_size                     = "1"
+  bisect_batch_on_function_error = "false"
+  enabled                        = "true"
+  event_source_arn               = aws_sqs_queue.resizing_queue.arn
+  function_name                  = aws_lambda_function.resizing_lambda.arn
 }
 
 
@@ -47,22 +47,22 @@ resource "aws_lambda_function" "thumbnail_lambda" {
   memory_size = 128
   timeout     = 3
 
-# Lambda에서 사용할 환경변수 설정
- environment {
+  # Lambda에서 사용할 환경변수 설정
+  environment {
     variables = {
-      S3_BUCKET_NAME   = aws_s3_bucket.s3_bucket.bucket
+      S3_BUCKET_NAME        = aws_s3_bucket.s3_bucket.bucket
       THUMBNAIL_BUCKET_NAME = aws_s3_bucket.s3_bucket.bucket
-      SQS_QUEUE_NAME = aws_sqs_queue.thumbnail_queue.name
+      SQS_QUEUE_NAME        = aws_sqs_queue.thumbnail_queue.name
     }
   }
 }
 
 resource "aws_lambda_event_source_mapping" "thumbnail_event_source_mapping" {
-  batch_size                         = "1"
-  bisect_batch_on_function_error     = "false"
-  enabled                            = "true"
-  event_source_arn                   = aws_sqs_queue.thumbnail_queue.arn
-  function_name                      = aws_lambda_function.thumbnail_lambda.arn
+  batch_size                     = "1"
+  bisect_batch_on_function_error = "false"
+  enabled                        = "true"
+  event_source_arn               = aws_sqs_queue.thumbnail_queue.arn
+  function_name                  = aws_lambda_function.thumbnail_lambda.arn
 }
 
 

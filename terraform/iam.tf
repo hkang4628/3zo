@@ -41,8 +41,8 @@ resource "aws_iam_role" "ec2_role" {
     ]
   })
 
-    # 정책 연결
-  managed_policy_arns  = [aws_iam_policy.s3_policy.arn, "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore", "arn:aws:iam::aws:policy/AmazonSSMPatchAssociation"]
+  # 정책 연결
+  managed_policy_arns = [aws_iam_policy.s3_policy.arn, "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore", "arn:aws:iam::aws:policy/AmazonSSMPatchAssociation"]
 }
 
 # Instance profile 연결 
@@ -120,8 +120,8 @@ resource "aws_iam_policy" "sns_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = ["sns:*"] # 모든 권한 
+        Effect   = "Allow"
+        Action   = ["sns:*"]           # 모든 권한 
         Resource = "arn:aws:sns:*:*:*" # 모든 sns의 권한 부여
       }
     ]
@@ -153,8 +153,8 @@ resource "aws_iam_policy" "ses_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = ["ses:*"] # 모든 권한 
+        Effect   = "Allow"
+        Action   = ["ses:*"]           # 모든 권한 
         Resource = "arn:aws:ses:*:*:*" # 모든 ses의 권한 부여
       }
     ]

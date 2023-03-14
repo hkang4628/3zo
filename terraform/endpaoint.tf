@@ -36,10 +36,10 @@ resource "aws_vpc_endpoint" "ec2messages_endpoint" {
 }
 
 resource "aws_vpc_endpoint" "gateway_endpoint" {
-  vpc_id              = aws_vpc.main.id
-  service_name        = "com.amazonaws.${var.aws_region}.s3"
-  vpc_endpoint_type   = "Gateway"
-  route_table_ids = [aws_route_table.private_rt1.id, aws_route_table.private_rt2.id]
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.${var.aws_region}.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = [aws_route_table.private_rt1.id, aws_route_table.private_rt2.id]
   tags = {
     Name = "main gateway endpoint"
   }

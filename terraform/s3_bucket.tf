@@ -10,6 +10,37 @@ resource "aws_s3_bucket" "s3_bucket" {
   # delete buckets before deleting their contents, but this behaviour can be
   # changed with the `force_destroy` parameter.
   force_destroy = true
+
+    grant {
+    id          = "7b0ff0244c0142d26773eb72318b5e1c6712d2a9e4259c5cae50b30012cf7210"
+    permissions = ["FULL_CONTROL"]
+    type        = "CanonicalUser"
+  }
+
+  object_lock_enabled = "false"
+
+  policy = jsonencode(
+    {
+      "Id": "PolicyForCloudFrontPrivateContent",
+      "Statement": [
+        {
+          "Action": "s3:GetObject",
+          "Condition": {
+            "StringEquals": {
+              "AWS:SourceArn": "arn:aws:cloudfront::881855020500:distribution/${aws_cloudfront_distribution.s3_distribution.id}"
+            }
+          },
+          "Effect": "Allow",
+          "Principal": {
+            "Service": "cloudfront.amazonaws.com"
+          },
+          "Resource": "arn:aws:s3:::flower53-image-bucket/*",
+          "Sid": "AllowCloudFrontServicePrincipal"
+        }
+      ],
+      "Version": "2008-10-17"
+    }
+  )
 }
 
 
