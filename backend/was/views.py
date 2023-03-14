@@ -1,10 +1,12 @@
 from django.http import JsonResponse
 from django.utils.encoding import smart_str
+from django.utils import timezone
+from django.conf import settings
 from .models import Member, Contest
 
 import json
-import ftplib
 import socket
+import boto3
 
 from .models import Contest
 
@@ -94,25 +96,12 @@ def contest_list(request):
     return response
 
 
-def upload_file_to_ftp_server(file, ftp_server, ftp_username, ftp_password, ftp_directory):
-    # FTP 서버에 연결
-    ftp = ftplib.FTP(ftp_server)
-    ftp.login(ftp_username, ftp_password)
-
-    # 파일 읽어오기 : 접속 테스트용
-    print(ftp.dir())
-    print(file)
-    # 파일을 이진 모드로 열어서 FTP 서버에 전송
-    with open(file, 'rb') as f:
-        ftp.cwd(ftp_directory)
-        ftp.storbinary('STOR ' + file.split("/")[-1], f)
-
-    # FTP 연결 해제
-    ftp.quit()
-
-
 def upload(request):
     if request.method == "POST":
+        aws_access_key_id = settings.AWS_ACCESS_KEY_ID
+        aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+        s3_domain = "s3.flower53.site"
+
         title = request.POST['title']
         location = request.POST['location']
         member_id = request.POST['member_id']
@@ -121,19 +110,37 @@ def upload(request):
         email = request.POST['email']
         image = request.FILES['image']
 
-        file_name = image.name
-        file_path = './img_temp/' + file_name
+        # 이미지 파일의 content_type 속성을 사용하여 확장자를 추출합니다.
+        extension = image.content_type.split('/')[-1]
 
-        # 이미지 파일을 로컬 디스크에 저장
-        with open(file_path, 'wb') as f:
-            for chunk in image.chunks():
-                f.write(chunk)
+        # 현재 시간을 기준으로 timestamp 생성
+        timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
 
-        # 이미지 파일을 FTP 서버에 전송
-        upload_file_to_ftp_server(file_path, '192.168.108.10',
-                                  'test', 'test', '/contest')
+        # email @ 치환 (s3 저장용)
+        re_email = email.replace("@", "-")
 
-        # # 로컬 디스크에 저장된 이미지 파일 삭제
-        # os.remove(file_path)
+        # s3 관련 코드
+        s3 = boto3.client('s3', region_name='us-east-1', aws_access_key_id=aws_access_key_id,
+                          aws_secret_access_key=aws_secret_access_key)
 
-        return JsonResponse({'result': "upload success"})
+        # S3 버킷 이름과 저장할 파일명을 설정합니다.
+        bucket_name = 'flower53-image-bucket'
+        filename_origin = f'origin/{re_email}-{timestamp}.{extension}'
+        filename = f'{timestamp}.{extension}'
+        try:
+            # S3 버킷 origin에 이미지 파일을 업로드합니다.
+            s3.upload_fileobj(image, bucket_name, filename_origin,)
+
+            # 업로드한 이미지 URL을 생성합니다.
+            url = f'https://{s3_domain}/{filename_origin}'
+
+            # 업로드 성공 시 DB에도 정보 저장
+            Contest(title=title, member_name=member_name, member_id=member_id, location=location,
+                    thumbnail=f'ThumbnailImage-{filename}', img_url=f'Resized-{filename}').save()
+
+            # 업로드한 이미지 URL을 JsonResponse로 반환합니다.
+            return JsonResponse({'message': 'success', 'url': url})
+
+        except:
+            # 업로드에 실패한 경우, 에러 메시지를 JsonResponse로 반환합니다.
+            return JsonResponse({'message': 'Failed to upload image.'}, status=400)

@@ -95,6 +95,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # }
 DATABASES = my_setting.DATABASES
 SECRET_KEY = my_setting.SECRET_KEY
+AWS_ACCESS_KEY_ID = my_setting.AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY = my_setting.AWS_SECRET_ACCESS_KEY
 
 
 # Password validation
