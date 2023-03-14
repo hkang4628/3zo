@@ -41,7 +41,10 @@ const ContestList = () => {
         {contests.map((contest) => (
           <div className="contest" key={contest.id}>
             <Link to={`/contest-detail?id=${contest.id}`}>
-              <img src={contest.thumbnail} alt={contest.title} />
+              <img
+                src={`https://s3.flower53.site/thumbnail/${contest.thumbnail}`}
+                alt={contest.title}
+              />
               <div className="contest-content">
                 <h2 className="contest-title">{contest.title}</h2>
                 <p className="contest-member_name">{contest.member_name}</p>

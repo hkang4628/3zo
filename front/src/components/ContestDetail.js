@@ -26,7 +26,10 @@ export default function ContestDetail() {
   return (
     <div className="frame-container">
       <div className="frame-image">
-        <img src={contest.img_url} alt={contest.title} />
+        <img
+          src={`https://s3.flower53.site/resized/${contest.img_url}`}
+          alt={contest.title}
+        />
       </div>
       <div className="frame-info">
         <p className="frame-location">{contest.location}</p>

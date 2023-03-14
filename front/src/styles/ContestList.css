@@ -82,3 +82,29 @@ a:hover,
 a:active {
   text-decoration: none;
 }
+
+.contest-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 30px;
+}
+
+.contest-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.contest-member_name {
+  font-size: 16px;
+  color: #999;
+  margin-bottom: 5px;
+}
+
+.contest-location {
+  font-size: 16px;
+  color: #999;
+}

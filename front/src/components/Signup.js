@@ -28,7 +28,7 @@ const Signup = () => {
     const { id, pw, name, phone, email } = event.target.elements;
 
     try {
-      const response = await axios.post(`${SERVER_URL}`, {
+      const response = await axios.post(`${SERVER_URL}/signup/`, {
         id: id.value,
         pw: pw.value,
         name: name.value,

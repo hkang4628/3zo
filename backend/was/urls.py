@@ -17,11 +17,11 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.health_check, name='health_check'),
-    path('signup/', views.signup, name='signup'),
-    path('login/', views.login, name='login'),
-    path('contest_list/', views.contest_list, name='contest_list'),
-    path('contest_detail/', views.contest_detail, name='contest_detail'),
-    path('upload/', views.upload, name='upload'),
+    path('proxy/', views.health_check, name='health_check'),
+    path('proxy/signup/', views.signup, name='signup'),
+    path('proxy/login/', views.login, name='login'),
+    path('proxy/contest_list/', views.contest_list, name='contest_list'),
+    path('proxy/contest_detail/', views.contest_detail, name='contest_detail'),
+    path('proxy/upload/', views.upload, name='upload'),
     # path('upload/<idx>/image/', views.image, name='image'),
 ]

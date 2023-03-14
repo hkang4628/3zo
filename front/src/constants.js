@@ -1,1 +1,2 @@
-export const SERVER_URL = "http://aws.flower53.site/proxy";
+export const SERVER_URL =
+  "http://web-lb-329549199.us-east-1.elb.amazonaws.com/proxy";
