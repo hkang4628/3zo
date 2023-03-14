@@ -44,7 +44,8 @@ resource "aws_launch_template" "web_launch_template" {
 # Launch Template을 생성하는 코드를 작성합니다.
 resource "aws_launch_template" "was_launch_template" {
   name_prefix   = "was-lt"
-  image_id      = data.aws_ami.ubuntu.id
+  # image_id      = data.aws_ami.ubuntu.id
+  image_id      = "ami-0e41895b003203323"
   instance_type = var.instance_type
   key_name      = var.key_name
 

@@ -75,7 +75,7 @@ resource "aws_lb_target_group" "was_target_group" {
   target_type = "instance"
 
   health_check {
-    path     = "/"
+    path     = "/proxy/"
     interval = 12
     timeout  = 4
   }
