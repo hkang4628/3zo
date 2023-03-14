@@ -34,7 +34,7 @@ resource "aws_cloudfront_distribution" "web_distribution" {
     target_origin_id = aws_lb.web_lb.dns_name
     compress         = true
 
-    viewer_protocol_policy = "redirect-to-https" //http로 들어오면 https로 바꿔 cloudfront의 인증서로 처리함
+    viewer_protocol_policy = "allow-all" //http로 들어오면 https로 바꿔 cloudfront의 인증서로 처리함
 
     # 기존 생성된 policy를 사용하므로 설정 안함
     # min_ttl                = 0
