@@ -49,50 +49,54 @@ const Signup = () => {
 
   return (
     <>
-      <img src={mainImg} className="signup-img" />
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="id">ID</label>
-          <input type="text" id="id" name="id" onChange={handleInputChange} />
-        </div>
-        <div>
-          <label htmlFor="pw">Password</label>
-          <input
-            type="password"
-            id="pw"
-            name="pw"
-            onChange={handleInputChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="name">Name</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            onChange={handleInputChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="phone">Phone</label>
-          <input
-            type="text"
-            id="phone"
-            name="phone"
-            onChange={handleInputChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            onChange={handleInputChange}
-          />
-        </div>
-        <button type="submit">Register</button>
-      </form>
+      <div className="frame-container">
+        <img src={mainImg} className="signup-img" />
+        <form onSubmit={handleSubmit} className="frame-form">
+          <div className="form-group">
+            <label htmlFor="id">ID</label>
+            <input type="text" id="id" name="id" onChange={handleInputChange} />
+          </div>
+          <div className="form-group">
+            <label htmlFor="pw">PW</label>
+            <input
+              type="password"
+              id="pw"
+              name="pw"
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="name">Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="phone">Phone</label>
+            <input
+              type="text"
+              id="phone"
+              name="phone"
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              onChange={handleInputChange}
+            />
+          </div>
+          <button type="submit" className="form-button">
+            회원가입
+          </button>
+        </form>
+      </div>
     </>
   );
 };

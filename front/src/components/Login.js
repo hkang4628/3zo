@@ -61,15 +61,15 @@ const Login = () => {
   };
 
   return (
-    <>
+    <div className="frame-container">
       <img src={mainImg} className="login-img" />
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form onSubmit={handleSubmit} className="frame-form">
+        <div className="form-group">
           <label htmlFor="id">ID</label>
           <input type="text" id="id" name="id" onChange={handleInputChange} />
         </div>
-        <div>
-          <label htmlFor="password">Password</label>
+        <div className="form-group">
+          <label htmlFor="password">PW</label>
           <input
             type="password"
             id="pw"
@@ -77,9 +77,11 @@ const Login = () => {
             onChange={handleInputChange}
           />
         </div>
-        <button type="submit">Log In</button>
+        <button type="submit" className="form-button">
+          로그인
+        </button>
       </form>
-    </>
+    </div>
   );
 };
 
