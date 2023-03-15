@@ -2,8 +2,9 @@
 # Launch Template을 생성하는 코드를 작성합니다.
 resource "aws_launch_template" "web_launch_template" {
   name_prefix   = "web-lt"
-  image_id      = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
+  # image_id      = data.aws_ami.ubuntu.id
+  image_id      = "ami-04289a3d6570bf62b" # web_template
   key_name      = var.key_name
 
   # 위에서 생성한 Security Group ID를 지정합니다.
@@ -45,7 +46,7 @@ resource "aws_launch_template" "web_launch_template" {
 resource "aws_launch_template" "was_launch_template" {
   name_prefix   = "was-lt"
   # image_id      = data.aws_ami.ubuntu.id
-  image_id      = "ami-0e41895b003203323"
+  image_id      = "ami-0e41895b003203323" # was_tempate
   instance_type = var.instance_type
   key_name      = var.key_name
 

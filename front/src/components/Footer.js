@@ -8,7 +8,7 @@ function Footer() {
       <footer className="footer-container">
         <div className="footer-left">
           <a href="/" className="footer-logo">
-            <img src={logoImg} className="logo"></img>
+            AWS
           </a>
         </div>
         <div className="footer-right">
