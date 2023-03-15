@@ -12,7 +12,10 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import my_setting
+import sys
 
+sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf8', buffering=1)
+sys.stderr = open(sys.stderr.fileno(), mode='w', encoding='utf8', buffering=1)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
