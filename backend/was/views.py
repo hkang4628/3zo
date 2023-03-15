@@ -1,12 +1,10 @@
 from django.http import JsonResponse
 from django.utils.encoding import smart_str
 from django.utils import timezone
-from django.conf import settings
 from .models import Member, Contest
 
 import json
 import socket
-import boto3
 
 from .models import Contest
 
@@ -98,9 +96,6 @@ def contest_list(request):
 
 def upload(request):
     if request.method == "POST":
-        aws_access_key_id = settings.AWS_ACCESS_KEY_ID
-        aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
-        s3_domain = "s3.flower53.site"
 
         title = request.POST['title']
         location = request.POST['location']
@@ -119,28 +114,5 @@ def upload(request):
         # email @ 치환 (s3 저장용)
         re_email = email.replace("@", "-")
 
-        # s3 관련 코드
-        s3 = boto3.client('s3', region_name='us-east-1', aws_access_key_id=aws_access_key_id,
-                          aws_secret_access_key=aws_secret_access_key)
-
-        # S3 버킷 이름과 저장할 파일명을 설정합니다.
-        bucket_name = 'flower53-image-bucket'
-        filename_origin = f'origin/{re_email}-{timestamp}.{extension}'
-        filename = f'{timestamp}.{extension}'
-        try:
-            # S3 버킷 origin에 이미지 파일을 업로드합니다.
-            s3.upload_fileobj(image, bucket_name, filename_origin,)
-
-            # 업로드한 이미지 URL을 생성합니다.
-            url = f'https://{s3_domain}/{filename_origin}'
-
-            # 업로드 성공 시 DB에도 정보 저장
-            Contest(title=title, member_name=member_name, member_id=member_id, location=location,
-                    thumbnail=f'ThumbnailImage-{filename}', img_url=f'Resized-{filename}').save()
-
-            # 업로드한 이미지 URL을 JsonResponse로 반환합니다.
-            return JsonResponse({'message': 'success', 'url': url})
-
-        except:
-            # 업로드에 실패한 경우, 에러 메시지를 JsonResponse로 반환합니다.
-            return JsonResponse({'message': 'Failed to upload image.'}, status=400)
+        return JsonResponse({'result': "success"})
+    return JsonResponse({'result': "fail"})
