@@ -5,7 +5,8 @@ from .models import Member, Contest
 
 import json
 import socket
-
+import ftplib
+import os
 from .models import Contest
 
 
@@ -94,6 +95,25 @@ def contest_list(request):
     return response
 
 
+def upload_file_to_ftp_server(file, ftp_server, ftp_username, ftp_password, ftp_directory, filename):
+    # FTP 서버에 연결
+    ftp = ftplib.FTP(ftp_server)
+
+    ftp.login(ftp_username, ftp_password)
+
+    # 파일 읽어오기 : 접속 확인용
+    print(ftp.dir())
+    print(file)
+
+    # 파일을 이진 모드로 열어서 FTP 서버에 전송
+    with open(file, 'rb') as f:
+        ftp.cwd(ftp_directory)
+        ftp.storbinary('STOR ' + filename, f)
+
+    # FTP 연결 해제
+    ftp.quit()
+
+
 def upload(request):
     if request.method == "POST":
 
@@ -113,6 +133,26 @@ def upload(request):
 
         # email @ 치환 (s3 저장용)
         re_email = email.replace("@", "-")
+
+        # 이미지 파일을 로컬 디스크에 저장
+        filename = f'{timestamp}.{extension}'
+        e_filename = f'{re_email}-{filename}'
+        
+        file_path = f'./img_temp/{image.name}'
+        with open(file_path, 'wb') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
+
+        # 이미지 파일을 FTP 서버에 전송
+        upload_file_to_ftp_server(
+            file_path, '192.168.0.110', 'test', 'test', '/origin', e_filename)
+
+        # # 로컬 디스크에 저장된 이미지 파일 삭제
+        os.remove(file_path)
+
+        # 업로드 성공 시 DB에도 정보 저장
+        Contest(title=title, member_name=member_name, member_id=member_id, location=location,
+                thumbnail=f'ThumbnailImage-{filename}', img_url=f'Resized-{filename}').save()
 
         return JsonResponse({'result': "success"})
     return JsonResponse({'result': "fail"})
